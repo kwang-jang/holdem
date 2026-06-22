@@ -105,7 +105,7 @@
             <div>
                 <label class="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase">앞자리 액션 상태</label>
                 <div class="flex gap-1">
-                    <button onclick="updateState('facing', 'none')" id="face_none" class="flex-[1.2] py-2.5 rounded-lg text-[11px] btn-active">오픈 (폴드 or 림프)</button>
+                    <button onclick="updateState('facing', 'none')" id="face_none" class="flex-[1.2] py-2.5 rounded-lg text-[11px] btn-active">오픈 (폴드/림프)</button>
                     <button onclick="updateState('facing', 'raise')" id="face_raise" class="flex-1 py-2.5 rounded-lg text-[11px] btn-inactive">1 레이즈 나옴</button>
                     <button onclick="updateState('facing', 'multi')" id="face_multi" class="flex-1 py-2.5 rounded-lg text-[11px] btn-inactive">3-Bet / 멀티팟</button>
                 </div>
@@ -254,7 +254,7 @@
             badge.className = state.stack === 'deep' ? 'bg-emerald-600 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider' : 'bg-red-600 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider animate-pulse';
         }
 
-        // 💡 수티드 vs 오프수트 확률/사이징 완전 분산 연산 엔진
+        // 💡 포지션(Position)에 따른 GTO 완전 분산 연산 엔진
         function calculateGTO() {
             const rankOrder = "AKQJT98765432";
             let r1 = state.c1, r2 = state.c2;
@@ -264,17 +264,21 @@
             let fRaise = 0, fCall = 0, fFold = 100;
             let strategy = "EV 마이너스 핸드입니다. 폴드 레인지를 유지하세요.";
             
+            // Raise와 Call만 입력하면 Fold는 100%에서 자동 차감하여 게이지 버그 원천 차단
             const setFreq = (r, c) => { fRaise = r; fCall = c; fFold = 100 - r - c; };
             
-            // ------------------------------------------
-            // CASE A: 숏스택 상황 (<20bb SHORT)
-            // ------------------------------------------
+            // 포지션 분류 정의
+            const isIP = ['BTN', 'CO'].includes(state.pos); // 인포지션 (유리)
+            const isOOP = ['SB', 'BB', 'EP', 'MP'].includes(state.pos); // 아웃포지션 (불리)
+            const isBlinds = ['SB', 'BB'].includes(state.pos); // 블라인드
+            const isEarly = ['EP', 'MP'].includes(state.pos); // 얼리/미들
+
             if (state.stack === 'short') {
                 document.getElementById('raiseLabel').innerText = "ALL-IN";
                 if (state.facing === 'none') {
                     if (state.pos === 'BB') {
-                        if (isPair || ['AK','AQ','AJ','AT','KQ','KJ'].includes(core) || (isSuited && ['A9','A8','QJ','JT'].includes(core))) { setFreq(100, 0); strategy = "[BB 숏스택 올인] 림퍼들을 압박하여 폴드 에퀴티를 즉시 가져옵니다."; } 
-                        else { setFreq(0, 100); strategy = "[BB 공짜 체크] 올인 에퀴티가 부족하므로 체크하여 무료 플랍을 확인합니다."; }
+                        if (isPair || ['AK','AQ','AJ','AT','KQ','KJ'].includes(core) || (isSuited && ['A9','A8','QJ','JT'].includes(core))) { setFreq(100, 0); strategy = "[숏스택 BB 올인] 림퍼들을 압박하여 폴드 에퀴티를 즉시 가져옵니다."; } 
+                        else { setFreq(0, 100); strategy = "[숏스택 BB 체크] 올인 에퀴티가 부족하므로 체크하여 무료 플랍을 확인합니다."; }
                     } else {
                         if (isPair || ['AK','AQ','AJ','AT'].includes(core) || (isSuited && ['KQ','KJ','QJ','JT'].includes(core))) { setFreq(100, 0); strategy = "[숏스택 푸시] 포스트플랍 운영이 불가하므로 100% 오픈 올인으로 에퀴티를 실현합니다."; } 
                         else { setFreq(0, 0); strategy = "칩이 부족하더라도 이 핸드로 올인은 자살행위입니다. 폴드하세요."; }
@@ -287,9 +291,6 @@
                     else { setFreq(0, 0); strategy = "3-Bet이 교차하는 멀티웨이 팟입니다. 마진 핸드는 즉시 폐기하십시오."; }
                 }
             } 
-            // ------------------------------------------
-            // CASE B: 딥스택 상황 (50bb+ DEEP)
-            // ------------------------------------------
             else {
                 document.getElementById('raiseLabel').innerText = "Raise";
                 
@@ -301,39 +302,40 @@
                         else { setFreq(0, 100); strategy = "[BB 프리 플랍] 레이즈가 없으므로 100% 체크하여 비용 없이 패를 감상합니다."; }
                     } else {
                         if (isPair && ['A','K','Q','J'].includes(r1) || core === 'AK' || (isSuited && ['AQ','AJ','AT'].includes(core))) { setFreq(100, 0); strategy = "최상위 핵심 레인지입니다. 100% 확률로 레이즈하여 팟 빌딩을 개시하세요."; } 
-                        else if (isPair && ['T','9','8','7'].includes(r1) || (isSuited && ['KQ','KJ','QJ'].includes(core)) || (!isSuited && ['AQ'].includes(core))) { setFreq(85, 15); strategy = "오픈 레이즈가 표준이나 15% 빈도로 림프 트랩을 설계하여 인디스 가이즈를 유도합니다."; }
+                        else if (isPair && ['T','9','8','7'].includes(r1) || (isSuited && ['KQ','KJ','QJ'].includes(core)) || (!isSuited && ['AQ','AJ'].includes(core))) { setFreq(85, 15); strategy = "오픈 레이즈가 표준이나 15% 빈도로 림프 트랩을 설계하여 인디스 가이즈를 유도합니다."; }
                         else if (['AT','KJ','KQ','QT','QJ'].includes(core) || (isSuited && ['A9','K9','QT','JT','T9','98','87'].includes(core))) {
-                            if (['BTN', 'CO', 'SB'].includes(state.pos)) { setFreq(75, 0); strategy = "레이트 포지션의 스틸 이점을 극대화하여 75%의 높은 빈도로 오픈 레이즈를 선언합니다."; } 
-                            else { setFreq(15, 0); strategy = "얼리/미들 포지션에서는 도미네이트 당하기 딱 좋습니다. 85% 폴드하고 가끔 변칙 오픈하세요."; }
+                            if (isIP || state.pos === 'SB') { setFreq(75, 0); strategy = `레이트 포지션(${state.pos})의 스틸 이점을 극대화하여 75%의 높은 빈도로 오픈 레이즈를 선언합니다.`; } 
+                            else { setFreq(15, 0); strategy = `얼리 포지션(${state.pos})에서는 도미네이트 당하기 딱 좋습니다. 85% 폴드하고 가끔 변칙 오픈하세요.`; }
                         } else { setFreq(0,0); }
                     }
                 } 
                 // 2. 앞자리 오픈 레이즈 존재 상황 (방어 전략)
                 else if (state.facing === 'raise') {
                     if (isPair && ['A','K'].includes(r1)) { setFreq(80, 20); strategy = "AA, KK 블록입니다. 80% 빈도로 강력한 3-Bet 레이즈를 치고, 20%는 Call 트랩을 파세요."; }
-                    
-                    // 수티드(AQs)와 오프수트(AQo) 완벽 분리 연산 구간
                     else if (isSuited && core === 'AK') { setFreq(70, 30); strategy = "AKs입니다. 포스트플랍 드로우 에퀴티가 무시무시하므로 70% 3-Bet 레이즈, 30% 플랫 콜로 믹싱합니다."; }
                     else if (!isSuited && core === 'AK') { setFreq(60, 40); strategy = "AKo입니다. 쇼다운 밸류는 높으나 수티드보다 운영이 제한되므로 60% 레이즈, 40% 콜로 균형을 맞춥니다."; }
                     
+                    // 수티드 vs 오프수트, 포지션별 완벽 분리 연산 구간
                     else if (isSuited && core === 'AQ') {
-                        if (['BTN', 'CO'].includes(state.pos)) { setFreq(45, 55); strategy = "AQs 인포지션입니다. 55% 고빈도 콜로 안전하게 플랍 드로우를 보고 45%는 주도권 탈환용 3-Bet 레이즈를 쏩니다."; }
-                        else { setFreq(30, 50); strategy = "AQs OOP포지션입니다. 포지션이 불리하므로 30% 레이즈, 50% 콜로 대응하고 20%는 보수적으로 폴드합니다."; }
+                        if (isIP) { setFreq(45, 55); strategy = "AQs 인포지션입니다. 55% 고빈도 콜로 안전하게 플랍 드로우를 보고 45%는 주도권 탈환용 3-Bet 레이즈를 쏩니다."; }
+                        else if (isBlinds) { setFreq(30, 50); strategy = "AQs 블라인드(SB/BB)입니다. 포지션이 불리하므로 30% 레이즈, 50% 콜로 대응하고 20%는 보수적으로 폴드합니다."; }
+                        else { setFreq(20, 20); strategy = "AQs OOP포지션입니다. 레이저의 얼리 레인지에 완전히 밟힙니다. 타이트하게 60% 폴드, 20% 레이즈, 20% 콜로 방어합니다."; }
                     }
                     else if (!isSuited && core === 'AQ') {
-                        if (['BTN', 'CO'].includes(state.pos)) { setFreq(20, 35); strategy = "AQo 인포지션입니다. 오프수트는 포스트플랍 마진이 확 꺾입니다. 45% 고빈도로 폴드하고 35% 콜, 20%만 블러프 레이즈 하세요."; }
-                        else { setFreq(0, 15); strategy = "AQo 얼리/OOP 포지션입니다. 레이저의 얼리 레인지에 완전히 밟힙니다. GTO 표준에 따라 85% 빈도로 무조건 폴드하세요."; }
+                        if (isIP) { setFreq(20, 35); strategy = "AQo 인포지션입니다. 오프수트는 포스트플랍 마진이 확 꺾입니다. 45% 고빈도로 폴드하고 35% 콜, 20%만 블러프 레이즈 하세요."; }
+                        else if (isBlinds) { setFreq(0, 25); strategy = "AQo 블라인드(SB/BB)입니다. OOP에서는 절대 무리하지 않습니다. GTO는 75% 폴드를 권장합니다. 25%만 배당 콜하세요."; }
+                        else { setFreq(0, 0); strategy = "AQo OOP포지션입니다. 얼리/미들 레이저를 상대로 이 핸드는 시체입니다. GTO 100% 폴드 구역입니다."; }
                     }
                     
                     else if (isPair && ['Q','J','T'].includes(r1)) {
-                        if (['SB', 'BB'].includes(state.pos)) { setFreq(75, 25); strategy = "블라인드 방어 상황입니다. 아웃포지션의 불리함을 깨기 위해 강하게 75% 3-Bet 레이즈로 밀어붙이세요."; } 
+                        if (isBlinds) { setFreq(75, 25); strategy = "블라인드 방어 상황입니다. 아웃포지션의 불리함을 깨기 위해 강하게 75% 3-Bet 레이즈로 밀어붙이세요."; } 
                         else { setFreq(35, 65); strategy = "인포지션 상위 페어입니다. 콜 빈도를 65%로 높여 포스트플랍 세트 마이닝 및 밸류 배당을 도모합니다."; }
                     }
                     else if (isPair && ['9','8','7','6'].includes(r1)) { setFreq(10, 80); strategy = "미들 페어 레인지입니다. 80% 콜로 플랍 세트(Set) 확률 배당을 노리고 10%만 변칙 블러프 레이즈합니다."; }
                     else if (isSuited && ['AJ','AT','KJ','KQ','QJ','JT','T9'].includes(core)) { setFreq(15, 65); strategy = "준수한 수티드 브로드웨이/커넥터 라인입니다. 플러시 포텐셜을 믿고 65% 콜로 플랍을 구경합니다."; }
-                    else if (!isSuited && ['AJ','AJo','KQ'].includes(core)) {
-                        if (['BTN', 'BB'].includes(state.pos)) { setFreq(5, 35); strategy = "마지널 오프수트입니다. 버튼이나 BB 배당에서만 최소한(35%)으로 콜방어하고 60%는 죽으세요."; }
-                        else { setFreq(0, 0); strategy = "전형적인 도미네이션 역배당 함정 카드(오프수트)입니다. 얼리/미들 포지션 레이즈 상대로 무조건 100% 폴드하세요."; }
+                    else if (!isSuited && ['AJ','KQ'].includes(core)) {
+                        if (isBlinds || isIP) { setFreq(5, 35); strategy = "마지널 오프수트입니다. 포지션 이점이나 배당이 나오는 경우에만 최소한(35%)으로 콜방어하고 60%는 죽으세요."; }
+                        else { setFreq(0, 0); strategy = "전형적인 도미네이션 역배당 함정 카드(오프수트)입니다. 얼리/미들 OOP 포지션에서는 무조건 100% 폴드하세요."; }
                     }
                     else { setFreq(0,0); }
                 } 
@@ -345,7 +347,7 @@
                         else { setFreq(20, 30); strategy = "AKo 라인입니다. 3-Bet 멀티웨이 팟에서는 수티드보다 생존율이 요동치므로 50%의 고빈도로 폴드가 권장됩니다."; }
                     }
                     else if (isSuited && ['AQ','AJ'].includes(core)) {
-                        if (['BTN', 'CO'].includes(state.pos)) { setFreq(10, 40); strategy = "AQs/AJs 포지션 방어입니다. 인포지션 배당이 나오므로 40% 라인에서 제한적 콜방어를 시도합니다."; }
+                        if (isIP) { setFreq(10, 40); strategy = "AQs/AJs 포지션 방어입니다. 인포지션 배당이 나오므로 40% 라인에서 제한적 콜방어를 시도합니다."; }
                         else { setFreq(0, 0); strategy = "OOP 포지션에서 3-Bet을 맞이한 AQ 수티드는 더 이상 프리미엄이 아닙니다. 100% 폴드하여 스택을 지키세요."; }
                     }
                     else if (!isSuited && ['AQ'].includes(core)) { setFreq(0, 0); strategy = "3-Bet 멀티 팟에서 AQ 오프수트는 완벽한 머니 바인더(칩을 녹이는 주범)입니다. GTO 100% 폴드 지정 구역입니다."; }
@@ -353,13 +355,13 @@
                 }
             }
 
-            // 🎯 GTO 원칙에 의거한 사이징 계산 구조 (동일 액션 내 균등 배정으로 정보 노출 차단)
+            //추천 사이징 로직 (포지션별 분리)
             let sizingStr = "";
             if (fRaise > 0) {
-                if (state.stack === 'short') sizingStr = "ALL-IN (남은 스택 전부 푸시)";
+                if (state.stack === 'short') sizingStr = "ALL-IN (남은 스택 전부)";
                 else if (state.facing === 'none') sizingStr = state.level === 'low' ? "3.5x ~ 4x (오픈 레이즈 기본 사이즈)" : "2.2x ~ 2.5x (GTO 균형 사이즈)";
-                else if (state.facing === 'raise') sizingStr = ['SB','BB'].includes(state.pos) ? "상대 레이즈액의 3.8x ~ 4.2x (OOP 리레이즈)" : "상대 레이즈액의 3x (IP 리레이즈)";
-                else if (state.facing === 'multi') sizingStr = "상대 3-Bet 금액의 2.3x ~ 2.5x (4-Bet 사이즈)";
+                else if (state.facing === 'raise') sizingStr = isBlinds ? "상대 레이즈의 3.8x ~ 4.2x (OOP)" : "상대 레이즈의 3x (IP)";
+                else if (state.facing === 'multi') sizingStr = "상대 3-Bet 사이즈의 2.3x ~ 2.5x (4-Bet)";
             }
             
             const sizeBox = document.getElementById('sizingContainer');
@@ -370,7 +372,6 @@
                 sizeBox.classList.add('hidden');
             }
 
-            // 게이지 바 픽셀 및 수치 갱신
             const rB = document.getElementById('raiseBlock'), cB = document.getElementById('callBlock'), fB = document.getElementById('foldBlock');
             rB.style.width = fRaise + '%'; cB.style.width = fCall + '%'; fB.style.width = fFold + '%';
             document.getElementById('raisePct').innerText = fRaise > 0 ? fRaise + '%' : '';
@@ -383,9 +384,9 @@
             document.getElementById('strategyText').innerHTML = strategy;
         }
 
-        // ====================================================
+        // ----------------------------------------------------
         // [3. 핸드 모의전 미니게임 엔진]
-        // ====================================================
+        // ----------------------------------------------------
         let gameInitialized = false, streak = 0, maxStreak = 0;
         let deck = [], heroH = [], villainH = [], board = [];
         const suits = { 's': {sym:'♠'}, 'h': {sym:'♥'}, 'd': {sym:'♦'}, 'c': {sym:'♣'} };
@@ -409,11 +410,11 @@
                     <div class="card-face card-face-back"></div>
                     <div class="card-face card-face-front overflow-hidden">
                         <div class="absolute top-[2px] left-[5px] flex flex-col items-center">
-                            <span class="${col} font-black leading-none tracking-tighter" style="font-size: 1.3em;">${r}</span>
-                            <span class="${col} leading-none mt-[1px]" style="font-size: 0.8em;">${suits[sType].sym}</span>
+                            <span class="${col} font-black leading-none tracking-tighter" style="font-size: 1.4em;">${r}</span>
+                            <span class="${col} leading-none mt-[1px]" style="font-size: 0.9em;">${suits[sType].sym}</span>
                         </div>
-                        <div class="absolute bottom-[0px] right-[4px] flex items-center justify-center">
-                            <span class="${col} opacity-85 leading-none" style="font-size: 2.6em;">${suits[sType].sym}</span>
+                        <div class="absolute bottom-[-8px] right-[1px] flex items-center justify-center">
+                            <span class="${col} opacity-85 leading-none" style="font-size: 3.2em;">${suits[sType].sym}</span>
                         </div>
                     </div>
                 </div>
