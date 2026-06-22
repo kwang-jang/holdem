@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홀덤광장 Reactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap');
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #0f1115;
+            color: #E0E0E0;
+            user-select: none;
+        }
+        select {
+            appearance: none;
+            text-align: center;
+        }
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #4ade80;
+        }
+        .bar-transition {
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        button, select { -webkit-tap-highlight-color: transparent; }
+        
+        .btn-active { background-color: #22c55e; color: #000; font-weight: 800; }
+        .btn-inactive { background-color: #252932; color: #9ca3af; font-weight: 600; }
+    </style>
+    
+    <!-- [나중 참고] 구글 애드센스 승인 후 발급받는 자동광고 스크립트는 이 자리에 넣으시면 됩니다 -->
+</head>
+<body class="p-4 md:p-6 max-w-md mx-auto flex flex-col min-h-screen">
+
+    <header class="mb-4">
+        <h1 class="text-2xl font-extrabold text-white tracking-tight">홀덤광장 <span class="text-green-400">Reactive</span></h1>
+        <p class="text-xs text-gray-400 mt-1">100% Touch & Instant Analysis</p>
+    </header>
+
+    <!-- 📢 상단 광고 영역 (플레이어 눈에 가장 잘 띄는 곳) -->
+    <div class="mb-4 bg-[#1a1d24] rounded-xl border border-dashed border-gray-700 p-2 text-center text-xs text-gray-500 min-h-[60px] flex items-center justify-center">
+        <!-- 나중에 광고 주관사에서 주는 <ins> 태그나 스크립트를 이 글자 대신 넣으세요 -->
+        공고 및 배너 영역 (상단)
+    </div>
+
+    <!-- 100% 터치 UI 컨트롤러 패널 -->
+    <div class="bg-[#1a1d24] p-4 rounded-xl shadow-lg border border-gray-800 space-y-4 relative z-10">
+        <!-- 게임 레벨 -->
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 mb-1.5 uppercase">게임 레벨</label>
+            <div class="flex gap-2">
+                <button onclick="updateState('level', 'low')" id="lvl_low" class="flex-1 py-2.5 rounded-lg text-sm transition-colors btn-active">데일리 (Low)</button>
+                <button onclick="updateState('level', 'high')" id="lvl_high" class="flex-1 py-2.5 rounded-lg text-sm transition-colors btn-inactive">몬스터 (High)</button>
+            </div>
+        </div>
+
+        <!-- 내 포지션 -->
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 mb-1.5 uppercase">내 포지션</label>
+            <div class="flex justify-between gap-1">
+                <button onclick="updateState('pos', 'EP')" id="pos_EP" class="flex-1 py-2.5 rounded-lg text-xs transition-colors btn-active">EP</button>
+                <button onclick="updateState('pos', 'MP')" id="pos_MP" class="flex-1 py-2.5 rounded-lg text-xs transition-colors btn-inactive">MP</button>
+                <button onclick="updateState('pos', 'CO')" id="pos_CO" class="flex-1 py-2.5 rounded-lg text-xs transition-colors btn-inactive">CO</button>
+                <button onclick="updateState('pos', 'BTN')" id="pos_BTN" class="flex-1 py-2.5 rounded-lg text-xs transition-colors btn-inactive">BTN</button>
+                <button onclick="updateState('pos', 'SB')" id="pos_SB" class="flex-1 py-2.5 rounded-lg text-xs transition-colors btn-inactive">SB</button>
+                <button onclick="updateState('pos', 'BB')" id="pos_BB" class="flex-1 py-2.5 rounded-lg text-xs transition-colors btn-inactive">BB</button>
+            </div>
+        </div>
+
+        <!-- 앞자리 액션 및 사이즈 -->
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 mb-1.5 uppercase">앞자리 액션</label>
+                <div class="flex gap-1">
+                    <button onclick="updateState('facing', false)" id="face_false" class="flex-1 py-2 rounded-lg text-xs transition-colors btn-active">오픈</button>
+                    <button onclick="updateState('facing', true)" id="face_true" class="flex-1 py-2 rounded-lg text-xs transition-colors btn-inactive">레이즈</button>
+                </div>
+            </div>
+            <div id="sizeContainer" class="opacity-20 pointer-events-none transition-opacity">
+                <label class="block text-[10px] font-bold text-gray-500 mb-1.5 uppercase">레이즈 사이즈</label>
+                <select id="betSize" onchange="updateState('size', this.value)" class="w-full bg-[#252932] text-white font-semibold rounded-lg py-2 text-xs">
+                    <option value="2.5x">2.5x (표준)</option>
+                    <option value="3x">3.0x (강함)</option>
+                    <option value="4x+">4.0x+ (오버벳)</option>
+                </select>
+            </div>
+        </div>
+
+        <hr class="border-gray-700/50">
+
+        <!-- 내 핸드 선택 -->
+        <div>
+            <label class="block text-[10px] font-bold text-amber-500 mb-1.5 uppercase">내 핸드</label>
+            <div class="flex gap-2 items-center">
+                <select id="card1" onchange="updateState('c1', this.value)" class="flex-1 bg-[#252932] text-white font-extrabold rounded-lg py-3 text-lg border border-gray-700">
+                    <option value="A">A</option><option value="K">K</option><option value="Q">Q</option><option value="J">J</option>
+                    <option value="T">T</option><option value="9">9</option><option value="8">8</option><option value="7">7</option>
+                    <option value="6">6</option><option value="5">5</option><option value="4">4</option><option value="3">3</option>
+                    <option value="2">2</option>
+                </select>
+                <span class="text-gray-500 font-bold">-</span>
+                <select id="card2" onchange="updateState('c2', this.value)" class="flex-1 bg-[#252932] text-white font-extrabold rounded-lg py-3 text-lg border border-gray-700">
+                    <option value="A">A</option><option value="K" selected>K</option><option value="Q">Q</option><option value="J">J</option>
+                    <option value="T">T</option><option value="9">9</option><option value="8">8</option><option value="7">7</option>
+                    <option value="6">6</option><option value="5">5</option><option value="4">4</option><option value="3">3</option>
+                    <option value="2">2</option>
+                </select>
+                <div class="flex flex-col gap-1 w-1/3">
+                    <button onclick="updateState('suited', 's')" id="suit_s" class="w-full py-1.5 rounded-md text-[11px] btn-active transition-colors">Suited (s)</button>
+                    <button onclick="updateState('suited', 'o')" id="suit_o" class="w-full py-1.5 rounded-md text-[11px] btn-inactive transition-colors">Offsuit (o)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GTO 프리퀀시 UI 섹션 -->
+    <div id="resultCard" class="mt-4 flex-col flex-1">
+        
+        <div class="text-center mb-3">
+            <span id="displayHand" class="text-3xl font-extrabold text-white tracking-widest">AKs</span>
+        </div>
+
+        <div class="flex w-full h-24 rounded-xl overflow-hidden shadow-2xl font-bold text-white mb-3 border border-gray-700">
+            <div id="raiseBlock" class="bg-[#b91c1c] flex flex-col justify-center items-center bar-transition border-r border-black/20 overflow-hidden" style="width: 0%;">
+                <span class="text-xs opacity-80 uppercase tracking-widest">Raise</span>
+                <span id="raisePct" class="text-xl">0%</span>
+            </div>
+            <div id="callBlock" class="bg-[#15803d] flex flex-col justify-center items-center bar-transition border-r border-black/20 overflow-hidden" style="width: 0%;">
+                <span class="text-xs opacity-80 uppercase tracking-widest">Call</span>
+                <span id="callPct" class="text-xl">0%</span>
+            </div>
+            <div id="foldBlock" class="bg-[#1d4ed8] flex flex-col justify-center items-center bar-transition overflow-hidden" style="width: 0%;">
+                <span class="text-xs opacity-80 uppercase tracking-widest">Fold</span>
+                <span id="foldPct" class="text-xl">0%</span>
+            </div>
+        </div>
+
+        <div id="sizingContainer" class="hidden mb-4 bg-[#252932]/80 border border-red-500/30 rounded-xl p-3.5 text-center shadow-inner">
+            <span class="text-[11px] font-bold text-gray-400 mr-2 uppercase tracking-wide">🎯 추천 레이즈 사이즈 :</span>
+            <span id="recSizeText" class="text-[15px] font-extrabold text-red-400"></span>
+        </div>
+
+        <div class="bg-[#1a1d24] rounded-xl p-5 border border-gray-800 shadow-lg flex-1 mb-4">
+            <div class="mb-4">
+                <h3 class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> GTO 믹싱 전략
+                </h3>
+                <p id="strategyText" class="text-gray-200 text-sm leading-relaxed break-keep"></p>
+            </div>
+            
+            <div class="bg-[#252932] rounded-lg p-3.5 mt-3 border-l-2 border-green-500">
+                <h3 class="text-[11px] font-bold text-green-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
+                    익스플로잇 조정 (<span id="levelBadge"></span>)
+                </h3>
+                <p id="exploitTip" class="text-gray-300 text-[13px] leading-relaxed break-keep"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📢 하단 광고 영역 (스크롤을 내렸을 때 마주하는 리워드 공간) -->
+    <div class="mt-auto bg-[#1a1d24] rounded-xl border border-dashed border-gray-700 p-2 text-center text-xs text-gray-500 min-h-[60px] flex items-center justify-center mb-4">
+        광고 및 배너 영역 (하단)
+    </div>
+
+    <script>
+        const state = { level: 'low', pos: 'EP', facing: false, size: '2.5x', c1: 'A', c2: 'K', suited: 's' };
+
+        function updateState(key, value) {
+            state[key] = value;
+            renderUI();
+            calculateGTO();
+        }
+
+        function setBtnActive(id, isActive) {
+            const el = document.getElementById(id);
+            if (isActive) { el.classList.remove('btn-inactive'); el.classList.add('btn-active'); }
+            else { el.classList.remove('btn-active'); el.classList.add('btn-inactive'); }
+        }
+
+        function renderUI() {
+            setBtnActive('lvl_low', state.level === 'low');
+            setBtnActive('lvl_high', state.level === 'high');
+            ['EP', 'MP', 'CO', 'BTN', 'SB', 'BB'].forEach(p => { setBtnActive('pos_' + p, state.pos === p); });
+            setBtnActive('face_false', state.facing === false);
+            setBtnActive('face_true', state.facing === true);
+
+            const sizeContainer = document.getElementById('sizeContainer');
+            if (state.facing) { sizeContainer.classList.remove('opacity-20', 'pointer-events-none'); }
+            else { sizeContainer.classList.add('opacity-20', 'pointer-events-none'); }
+
+            if (state.c1 === state.c2) {
+                state.suited = 'o';
+                document.getElementById('suit_s').style.opacity = '0.3';
+                document.getElementById('suit_o').style.opacity = '0.3';
+            } else {
+                document.getElementById('suit_s').style.opacity = '1';
+                document.getElementById('suit_o').style.opacity = '1';
+            }
+            setBtnActive('suit_s', state.suited === 's');
+            setBtnActive('suit_o', state.suited === 'o');
+
+            const isPair = (state.c1 === state.c2);
+            let displayStr = isPair ? (state.c1 + state.c2) : (state.c1 + state.c2 + state.suited);
+            document.getElementById('displayHand').innerText = displayStr;
+            document.getElementById('levelBadge').innerText = state.level === 'low' ? 'Daily/Low' : 'Monster/High';
+        }
+
+        function calculateGTO() {
+            const rankOrder = "AKQJT98765432";
+            let r1 = state.c1, r2 = state.c2;
+            if (rankOrder.indexOf(r1) > rankOrder.indexOf(r2)) { let temp = r1; r1 = r2; r2 = temp; }
+            const core = r1 + r2; 
+            const isPair = (r1 === r2);
+            const isSuited = !isPair && (state.suited === 's');
+
+            const isPremiumPair = isPair && ['A','K','Q','J'].includes(r1);
+            const isMiddlePair = isPair && ['T','9','8','7'].includes(r1);
+
+            let fRaise = 0, fCall = 0, fFold = 100;
+            let strategy = "해당 상황에서는 EV(기대값)가 마이너스인 핸드입니다.";
+            let exploit = "루즈한 테이블일수록 멀티웨이 팟에 끌려가지 말고 깔끔하게 폴드하여 칩을 보호하세요.";
+
+            if (!state.facing) { 
+                if (isPremiumPair || core === 'AK' || (core === 'AQ' && isSuited)) {
+                    fRaise = 100; fCall = 0; fFold = 0;
+                    strategy = "최상위 프리미엄 핸드로, 100% 빈도로 레이즈하여 팟을 키워야 합니다.";
+                    exploit = state.level === 'low' ? "림프 트랩을놓지 말고 강하게 오픈하세요." : "일정한 표준 사이즈를 사용하여 레인지 밸런스를 유지하세요.";
+                } 
+                else if (isMiddlePair || (isSuited && ['AJ','AT','KQ','QJ'].includes(core)) || (!isSuited && core === 'AQ')) {
+                    fRaise = 85; fCall = 15; fFold = 0;
+                    strategy = "대부분 오픈 레이즈가 권장되나, 가끔 림프(Call)로 믹싱하여 트랩을 놓습니다.";
+                    exploit = state.level === 'low' ? "상대들이 콜을 잘 주므로 레이즈 빈도를 100%로 올려 밸류를 뽑아내세요." : "뒷자리 3-Bet을 대비해 오픈 후 폴드할 수 있는 마음가짐이 필요합니다.";
+                }
+                else if (['AT','KJ','QT'].includes(core) || (isSuited && ['A9','K9','QT','JT','T9','98','87','76'].includes(core))) {
+                    if (['BTN', 'CO', 'SB'].includes(state.pos)) {
+                        fRaise = 70; fCall = 0; fFold = 30;
+                        strategy = `레이트 포지션(${state.pos})에서는 폴드 에퀴티를 위해 높은 빈도로 스틸 레이즈를 섞어줍니다.`;
+                        exploit = state.level === 'low' ? "스틸이 잘 안 통한다면 폴드 빈도를 늘리세요." : "레이즈 빈도를 100%까지 올려 주도권을 잡으세요.";
+                    } else {
+                        fRaise = 15; fCall = 0; fFold = 85;
+                        strategy = `얼리/미들 포지션(${state.pos})에서는 대부분 폴드하지만, 15% 정도 믹싱하여 오픈합니다.`;
+                        exploit = "보수적으로 플레이하고 싶다면 100% 폴드하는 것이 장기적으로 유리합니다.";
+                    }
+                }
+            } 
+            else { 
+                if (isPair && ['A','K'].includes(r1)) {
+                    fRaise = 80; fCall = 20; fFold = 0;
+                    strategy = "기본적으로 3-Bet하지만, 20%는 플랫(Call)하여 상대의 4-Bet 블러프를 유도하거나 트랩을 놓습니다.";
+                    exploit = state.level === 'low' ? "트랩 없이 100% 3-Bet 하여 마진 콜을 받아내세요." : "상대 성향을 보고 믹싱 비율을 유동적으로 가져가세요.";
+                }
+                else if ((isPair && ['Q','J'].includes(r1)) || core === 'AK') {
+                    if (['SB', 'BB'].includes(state.pos)) { fRaise = 80; fCall = 20; fFold = 0; strategy = `OOP(${state.pos})에서는 주도권을 뺏기 위해 3-Bet 비중을 대폭 높여야 합니다.`; }
+                    else { fRaise = 45; fCall = 55; fFold = 0; strategy = `인포지션(${state.pos})에서는 플랫(Call) 비중을 높여 포스트플랍을 도모합니다.`; }
+                    exploit = state.level === 'low' ? "콜 비중을 늘려 멀티웨이 플랍에서 밸류를 노리세요." : "상대 오픈 레인지가 넓다면 3-Bet 리스틸 빈도를 확 끌어올리세요.";
+                }
+                else if (isMiddlePair || (isSuited && ['AQ','AJ','KQ','JT','T9','98'].includes(core))) {
+                    if (state.size === '4x+') {
+                        fRaise = 0; fCall = 5; fFold = 95;
+                        strategy = "상대의 오버벳은 넛(Nut) 레인지일 확률이 높아 셋마이닝 배당이 나오지 않습니다.";
+                        exploit = "스택이 딥하지 않다면 고민 없이 100% 폴드하세요.";
+                    } else {
+                        fRaise = 10; fCall = 75; fFold = 15;
+                        strategy = `포지션(${state.pos})을 살려 콜로 셋마이닝이나 드로우를 노리며, 가끔 3-Bet 블러프를 섞습니다.`;
+                        exploit = state.level === 'low' ? "핏오어폴드(맞으면 벳, 안맞으면 폴드) 전략만 구사하세요." : "보드가 드라이할 때 플로팅으로 팟을 뺏어오는 전략이 필요합니다.";
+                    }
+                }
+                else if (['AT','KJ','QJ'].includes(core) && !isSuited) {
+                    fRaise = 5; fCall = 5; fFold = 90;
+                    strategy = "도미네이션(Domination) 함정 핸드입니다. 극히 낮은 빈도로 블러핑을 섞지만 기본은 폴드입니다.";
+                    exploit = state.level === 'low' ? "블러핑 없이 무조건 폴드하세요. 키커 싸움에서 칩을 잃습니다." : "상대가 타이트할수록 방어 빈도를 더 줄이세요.";
+                }
+            }
+
+            let sizingStr = "";
+            if (fRaise > 0) {
+                if (!state.facing) {
+                    sizingStr = state.level === 'low' ? "3x ~ 4x (림퍼 1명당 +1x)" : "2.2x ~ 2.5x (표준 사이즈 유지)";
+                } else {
+                    if (state.size === '4x+') { sizingStr = "올인(All-in) 또는 팟 커밋 사이즈"; }
+                    else {
+                        const isOOP = (state.pos === 'SB' || state.pos === 'BB');
+                        if (state.level === 'low') { sizingStr = isOOP ? "상대 레이즈의 4x (OOP 강하게)" : "상대 레이즈의 3.5x (IP 밸류업)"; }
+                        else { sizingStr = isOOP ? "상대 레이즈의 3.5x ~ 4x (OOP)" : "상대 레이즈의 3x (IP)"; }
+                    }
+                }
+            }
+
+            const sizingContainer = document.getElementById('sizingContainer');
+            if (fRaise > 0) { sizingContainer.classList.remove('hidden'); document.getElementById('recSizeText').innerText = sizingStr; }
+            else { sizingContainer.classList.add('hidden'); }
+
+            const raiseBlock = document.getElementById('raiseBlock');
+            const callBlock = document.getElementById('callBlock');
+            const foldBlock = document.getElementById('foldBlock');
+
+            raiseBlock.style.width = fRaise + '%'; callBlock.style.width = fCall + '%'; foldBlock.style.width = fFold + '%';
+            document.getElementById('raisePct').innerText = fRaise > 0 ? fRaise + '%' : '';
+            document.getElementById('callPct').innerText = fCall > 0 ? fCall + '%' : '';
+            document.getElementById('foldPct').innerText = fFold > 0 ? fFold + '%' : '';
+
+            raiseBlock.querySelector('span:first-child').style.display = fRaise < 15 ? 'none' : 'block';
+            callBlock.querySelector('span:first-child').style.display = fCall < 15 ? 'none' : 'block';
+            foldBlock.querySelector('span:first-child').style.display = fFold < 15 ? 'none' : 'block';
+
+            document.getElementById('strategyText').innerHTML = strategy;
+            document.getElementById('exploitTip').innerHTML = exploit;
+        }
+
+        window.onload = () => { renderUI(); calculateGTO(); };
+    </script>
+</body>
+</html>
