@@ -17,6 +17,10 @@
         .btn-inactive { background-color: #252932; color: #9ca3af; font-weight: 600; }
         .btn-alert { background-color: #ef4444; color: #fff; font-weight: 800; box-shadow: 0 0 10px rgba(239,68,68,0.4); }
         
+        /* 스크롤바 숨기기 */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
         /* ♠️ 리얼 3D 카드 플립 엔진 */
         .card-scene { perspective: 800px; }
         .card-wrap {
@@ -44,14 +48,14 @@
             border: 2px solid #ffffff; 
         }
         
-        /* ✨ 승리 카드 팝업 및 패배 카드 시인성 확보 */
+        /* ✨ 승리 카드 팝업 및 패배 카드 명확화 */
         .win-glow {
             border: 2px solid #eab308 !important; 
             box-shadow: 0 0 12px rgba(234, 179, 8, 0.7) !important; 
             z-index: 10;
         }
         .win-pop { transform: rotateY(180deg) scale(1.08) !important; z-index: 20; }
-        .card-dimmed { filter: brightness(0.7) grayscale(15%); }
+        .card-dimmed { filter: brightness(0.55) grayscale(40%); }
         
         .tab-active { border-bottom: 3px solid #4ade80; color: #4ade80; }
         .tab-inactive { color: #6b7280; }
@@ -64,8 +68,11 @@
             <div><h1 class="text-2xl font-extrabold text-white tracking-tight">홀덤광장 <span class="text-green-400">PRO</span></h1></div>
         </div>
         <div class="flex border-b border-gray-800 text-sm font-bold">
-            <button onclick="switchTab('solver')" id="tab_solver" class="flex-1 pb-2 tab-active transition-colors">🧠 프리플랍 가이드</button>
+            <button onclick="switchTab('solver')" id="tab_solver" class="flex-1 pb-2 tab-active transition-colors">🧠 실전 가이드</button>
             <button onclick="switchTab('game')" id="tab_game" class="flex-1 pb-2 tab-inactive transition-colors">⚔️ 핸드 모의전</button>
+            <button class="flex-1 pb-2 tab-inactive transition-colors opacity-40 cursor-not-allowed text-xs flex flex-col items-center justify-center">
+                <span>👑 심화 복기</span><span class="text-[8px] font-normal leading-none mt-0.5">(업데이트 예정)</span>
+            </button>
         </div>
     </header>
 
@@ -81,11 +88,17 @@
             </div>
             <hr class="border-gray-700/50">
 
-            <div>
-                <label class="block text-[11px] font-bold text-green-400 mb-1.5 uppercase">현재 내 스택 (칩 상황)</label>
-                <div class="flex gap-2">
-                    <button onclick="updateState('stack', 'deep')" id="stk_deep" class="flex-1 py-2.5 rounded-lg text-xs btn-active">여유로움 (50bb+)</button>
-                    <button onclick="updateState('stack', 'short')" id="stk_short" class="flex-1 py-2.5 rounded-lg text-xs btn-inactive">위험함 (20bb↓)</button>
+            <div class="w-full overflow-hidden">
+                <label class="block text-[11px] font-bold text-green-400 mb-1 uppercase">유효 스택 (나와 액션 상대 중 적은 칩)</label>
+                <p class="text-[9px] text-gray-500 mb-1.5">* 스택이 중간에 걸칠 경우 보수적인(아래쪽) 스택을 선택하세요.</p>
+                <div class="flex gap-1.5 overflow-x-auto hide-scrollbar pb-1">
+                    <button onclick="updateState('stack', '15')" id="stk_15" class="flex-shrink-0 w-[60px] py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>15↓</span><span class="text-[8px] font-normal opacity-70">Push</span></button>
+                    <button onclick="updateState('stack', '20')" id="stk_20" class="flex-shrink-0 w-[60px] py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>20</span><span class="text-[8px] font-normal opacity-70">Reshove</span></button>
+                    <button onclick="updateState('stack', '25')" id="stk_25" class="flex-shrink-0 w-[60px] py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>25</span><span class="text-[8px] font-normal opacity-70">Steal</span></button>
+                    <button onclick="updateState('stack', '30')" id="stk_30" class="flex-shrink-0 w-[60px] py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>30</span><span class="text-[8px] font-normal opacity-70">Resteal</span></button>
+                    <button onclick="updateState('stack', '40')" id="stk_40" class="flex-shrink-0 w-[60px] py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>40</span><span class="text-[8px] font-normal opacity-70">Mid</span></button>
+                    <button onclick="updateState('stack', '60')" id="stk_60" class="flex-shrink-0 w-[60px] py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>60</span><span class="text-[8px] font-normal opacity-70">Standard</span></button>
+                    <button onclick="updateState('stack', '100')" id="stk_100" class="flex-shrink-0 w-[60px] py-1.5 rounded-lg text-[10px] btn-active flex flex-col items-center leading-tight"><span>100+</span><span class="text-[8px] font-normal opacity-70">Deep</span></button>
                 </div>
             </div>
             <hr class="border-gray-700/50">
@@ -136,7 +149,7 @@
         <div id="resultCard" class="mt-4 flex-col flex-1 pb-4">
             <div class="flex items-center justify-center gap-3 mb-3">
                 <span id="displayHand" class="text-3xl font-extrabold text-white tracking-widest drop-shadow-md">AKs</span>
-                <span id="stackBadge" class="bg-emerald-600 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider">여유로움</span>
+                <span id="stackBadge" class="bg-emerald-600 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider">100+ BB</span>
             </div>
 
             <div class="flex w-full h-20 rounded-xl overflow-hidden shadow-2xl font-bold text-white mb-3 border border-gray-700">
@@ -171,6 +184,7 @@
     </div>
 
     <div id="gameTab" class="hidden flex-1 flex-col pb-4">
+        
         <div class="flex justify-between items-center bg-[#1a1d24] p-4 rounded-xl border border-gray-800 shadow-lg mb-4">
             <div class="flex flex-col">
                 <span class="text-xs text-gray-400 font-bold uppercase tracking-widest">현재 연승</span>
@@ -188,10 +202,12 @@
                 <div class="flex gap-2" id="villainCards"></div>
                 <div id="villainRank" class="h-4 mt-1.5 text-[12px] font-extrabold text-amber-500 opacity-0 transition-opacity"></div>
             </div>
+
             <div class="w-full flex flex-col items-center my-4 bg-[#252932] p-4 rounded-lg border border-gray-700 shadow-inner">
                 <span class="text-[10px] text-green-400 font-bold uppercase tracking-widest mb-3">Community Board</span>
                 <div class="flex gap-1.5" id="boardCards"></div>
             </div>
+
             <div class="w-full flex flex-col items-center">
                 <div id="heroRank" class="h-4 mb-1.5 text-[12px] font-extrabold text-blue-400 opacity-0 transition-opacity"></div>
                 <div class="flex gap-2" id="heroCards"></div>
@@ -225,7 +241,7 @@
             if(tab === 'game' && !gameInitialized) { initGame(); gameInitialized = true; }
         }
 
-        const state = { level: 'low', stack: 'deep', pos: 'EP', facing: 'none', c1: 'A', c2: 'K', suited: 's' };
+        const state = { level: 'low', stack: '100', pos: 'EP', facing: 'none', c1: 'A', c2: 'K', suited: 's' };
         
         function updateState(key, value) { state[key] = value; renderUI(); calculateGTO(); }
         function setBtnActive(id, isActive, isAlert = false) {
@@ -236,7 +252,12 @@
 
         function renderUI() {
             setBtnActive('lvl_low', state.level === 'low'); setBtnActive('lvl_high', state.level === 'high');
-            setBtnActive('stk_deep', state.stack === 'deep'); setBtnActive('stk_short', state.stack === 'short', true);
+            
+            // 7 슬롯 스택 업데이트
+            ['15', '20', '25', '30', '40', '60', '100'].forEach(s => { 
+                setBtnActive('stk_' + s, state.stack === s, ['15','20','25'].includes(s) && state.stack === s); 
+            });
+            
             ['EP', 'MP', 'CO', 'BTN', 'SB', 'BB'].forEach(p => { setBtnActive('pos_' + p, state.pos === p); });
             setBtnActive('face_none', state.facing === 'none'); setBtnActive('face_raise', state.facing === 'raise'); setBtnActive('face_multi', state.facing === 'multi', true);
             
@@ -244,70 +265,99 @@
             else { document.getElementById('suit_s').style.opacity = '1'; document.getElementById('suit_o').style.opacity = '1'; }
             setBtnActive('suit_s', state.suited === 's'); setBtnActive('suit_o', state.suited === 'o');
             
-            document.getElementById('displayHand').innerText = (state.c1 === state.c2) ? (state.c1 + state.c2) : (state.c1 + state.c2 + state.suited);
+            const rankOrder = "AKQJT98765432";
+            let displayC1 = state.c1, displayC2 = state.c2;
+            if (rankOrder.indexOf(displayC1) > rankOrder.indexOf(displayC2)) { let temp = displayC1; displayC1 = displayC2; displayC2 = temp; }
+            document.getElementById('displayHand').innerText = (displayC1 === displayC2) ? (displayC1 + displayC2) : (displayC1 + displayC2 + state.suited);
+            
             const badge = document.getElementById('stackBadge');
-            badge.innerText = state.stack === 'deep' ? '안정권 (50bb+)' : '위험군 (<20bb)';
-            badge.className = state.stack === 'deep' ? 'bg-emerald-600 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider' : 'bg-red-600 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider animate-pulse';
+            if(parseInt(state.stack) <= 15) { badge.innerText = '15BB↓ (Push/Fold)'; badge.className = 'bg-red-600 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider animate-pulse'; }
+            else if(state.stack === '20') { badge.innerText = '20BB (Reshove)'; badge.className = 'bg-red-500 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider'; }
+            else if(state.stack === '25') { badge.innerText = '25BB (Steal)'; badge.className = 'bg-orange-500 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider'; }
+            else if(state.stack === '30') { badge.innerText = '30BB (Resteal)'; badge.className = 'bg-yellow-600 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider'; }
+            else if(state.stack === '40') { badge.innerText = '40BB (Mid Stack)'; badge.className = 'bg-yellow-500 text-[10px] px-2 py-1 rounded-full text-black font-bold tracking-wider'; }
+            else if(state.stack === '60') { badge.innerText = '60BB (Standard)'; badge.className = 'bg-emerald-500 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider'; }
+            else { badge.innerText = '100BB+ (Deep)'; badge.className = 'bg-emerald-600 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider'; }
         }
 
-        // 💡 모든 조건 (테이블 성향/스택/포지션/수티드여부/액션) 독립 연산 엔진 
+        // 💡 169개 조합 무결점 처리 엔진
         function calculateGTO() {
             const rankOrder = "AKQJT98765432";
             let r1 = state.c1, r2 = state.c2;
             if (rankOrder.indexOf(r1) > rankOrder.indexOf(r2)) { let temp = r1; r1 = r2; r2 = temp; }
-            const core = r1 + r2, isPair = (r1 === r2), isSuited = !isPair && (state.suited === 's');
+            const core = r1 + r2;
+            const isPair = (r1 === r2);
+            const isSuited = !isPair && (state.suited === 's');
             
+            // 모든 핸드를 분류하여 누락 원천 차단
+            const isPremPair = isPair && ['A','K','Q','J','T'].includes(r1);
+            const isMidPair = isPair && ['9','8','7','6'].includes(r1);
+            const isLowPair = isPair && ['5','4','3','2'].includes(r1);
+            
+            const isPremSuited = isSuited && ['AK','AQ','AJ','AT','KQ'].includes(core);
+            const isStrongSuited = isSuited && ['KJ','KT','QJ','QT','JT'].includes(core);
+            
+            const isPremOffsuit = !isSuited && ['AK','AQ'].includes(core);
+            const isStrongOffsuit = !isSuited && ['AJ','AT','KQ','KJ'].includes(core);
+            const isBroadOffsuit = !isSuited && ['KT','QJ','QT','JT'].includes(core);
+            
+            const diff = Math.abs(rankOrder.indexOf(r1) - rankOrder.indexOf(r2));
+            const isSuitedConn = isSuited && diff <= 2 && !isPremSuited && !isStrongSuited && rankOrder.indexOf(r1) <= 9; // T9s 이하 커넥터
+            const isAxSuited = isSuited && r1 === 'A' && !isPremSuited; 
+            const isKxSuited = isSuited && r1 === 'K' && !isPremSuited && !isStrongSuited;
+
             let fRaise = 0, fCall = 0, fFold = 100;
-            let strategy = "EV 가치가 현저히 낮습니다. 기계적으로 폴드 레인지를 유지하십시오.";
+            let strategy = "EV 가치가 현저히 낮습니다. 이 자리에서는 기계적으로 폴드하십시오.";
             
             const posList = ['EP', 'MP', 'CO', 'BTN', 'SB', 'BB'];
             const posIdx = posList.indexOf(state.pos); 
             const isIP = ['BTN', 'CO'].includes(state.pos); 
-            const isOOP = ['SB', 'BB', 'EP', 'MP'].includes(state.pos); 
             const isBlinds = ['SB', 'BB'].includes(state.pos); 
-            
-            // 💡 테이블 성향(Level) 반영 변수 추가: High(터프)일수록 방어를 좁히고 폴드 증가
             const isTough = (state.level === 'high');
+            const effStack = parseInt(state.stack);
 
             const setFreq = (r, c) => { 
                 fRaise = Math.max(0, Math.min(100, r)); 
                 fCall = Math.max(0, Math.min(100 - fRaise, c)); 
                 fFold = Math.max(0, 100 - fRaise - fCall); 
-                
-                fRaise = Number(fRaise.toFixed(1));
-                fCall = Number(fCall.toFixed(1));
-                fFold = Number(fFold.toFixed(1));
+                fRaise = Number(fRaise.toFixed(1)); fCall = Number(fCall.toFixed(1)); fFold = Number(fFold.toFixed(1));
             };
 
             // ==========================================
-            // 1. 숏스택 상황 (<20bb)
+            // 1. 숏스택 이하 (Push/Fold 영역, 15bb~25bb)
             // ==========================================
-            if (state.stack === 'short') {
+            if (effStack <= 25) {
                 document.getElementById('raiseLabel').innerText = "ALL-IN";
+                
                 if (state.facing === 'none') {
                     if (state.pos === 'BB') {
-                        if (isPair || ['AK','AQ','AJ','AT','KQ','KJ'].includes(core) || (isSuited && ['A9','A8','QJ','JT'].includes(core))) { setFreq(100, 0); strategy = "[BB 스퀴즈 푸시] 림퍼들을 상대로 즉각적인 폴드 에퀴티를 회수합니다."; } 
-                        else { setFreq(0, 100); strategy = "[BB 무료 뷰] 칩이 짧아도 올인 에퀴티는 부족합니다. 무료 플랍을 확인합니다."; }
+                        if (isPremPair || isMidPair || isPremSuited || isStrongSuited || isPremOffsuit || isStrongOffsuit || isAxSuited || isSuitedConn) {
+                            setFreq(100, 0); strategy = "[BB 스퀴즈 푸시] 림퍼들을 상대로 즉각적인 올인을 박아 칩을 흡수합니다.";
+                        } else { setFreq(0, 100); strategy = "[BB 무료 뷰] 숏스택이라도 올인 에퀴티가 부족합니다. 체크하여 무료 플랍을 봅니다."; }
                     } else {
-                        let pushRange = isPair || ['AK','AQ'].includes(core);
-                        if(posIdx >= 2 && ['AJ','AT','KQ'].includes(core)) pushRange = true;
-                        if(posIdx >= 3 && isSuited && ['KJ','QJ','JT'].includes(core)) pushRange = true;
+                        let pushRange = isPremPair || isMidPair || isPremSuited || isPremOffsuit;
+                        if(posIdx >= 2 && (isStrongSuited || isStrongOffsuit || isAxSuited || isLowPair)) pushRange = true;
+                        if(posIdx >= 4 && isSuitedConn) pushRange = true; // 블라인드 방어
                         
-                        if(isTough && !isPair && core !== 'AK') pushRange = false; // 터프한 방을 상대론 푸시 레인지 타이트하게 축소
+                        if(isTough && effStack === 25 && !isPremPair && !isPremSuited && core !== 'AK') pushRange = false; 
 
-                        if (pushRange) { setFreq(100, 0); strategy = "[숏스택 푸시] 포스트플랍 공간이 없습니다. 100% 빈도로 오픈 올인을 박습니다."; } 
-                        else { setFreq(0, 0); strategy = "블라인드를 태우더라도 이 핸드로 올인은 자살행위입니다. 타이트하게 폴드합니다."; }
+                        if (pushRange) { setFreq(100, 0); strategy = "[숏스택 푸시] 포스트플랍 공간이 없습니다. 100% 빈도로 오픈 올인을 박아 폴드 에퀴티를 챙기세요."; } 
+                        else { setFreq(0, 0); strategy = "칩이 마르더라도 이 핸드로 먼저 올인하는 것은 EV 마이너스입니다."; }
                     }
                 } else if (state.facing === 'raise') {
-                    if (isPair && ['A','K','Q','J','T','9','8'].includes(r1) || ['AK','AQ'].includes(core) || (isSuited && ['AJ','AT'].includes(core))) { setFreq(100, 0); strategy = "[리잼 푸시] 오픈 레이저를 상대로 에퀴티 실현을 위해 올인 맞불을 놓습니다."; } 
-                    else { setFreq(0, 0); strategy = "도미네이션 위험이 극도로 높습니다. 마지널 핸드는 무조건 폴드합니다."; }
+                    let rejamRange = isPremPair || isPremSuited || isPremOffsuit;
+                    if(isBlinds && (isMidPair || isStrongSuited)) rejamRange = true; 
+                    if(isTough && isPremOffsuit && core !== 'AK') rejamRange = false; 
+
+                    if (rejamRange) { setFreq(100, 0); strategy = "[리잼 푸시] 오픈 레이저를 상대로 에퀴티 실현을 위해 올인(Reshove) 맞불을 놓습니다."; } 
+                    else { setFreq(0, 0); strategy = "도미네이션 위험이 극도로 높습니다. 숏스택일수록 확실한 패로 승부해야 합니다. 폴드."; }
                 } else {
-                    if (isPair && ['A','K','Q'].includes(r1) || core === 'AK') { setFreq(100, 0); strategy = "[멀티팟 올인] 강력한 프리미엄 라인입니다. 멀티웨이 생존을 위해 올인합니다."; } 
-                    else { setFreq(0, 0); strategy = "멀티웨이에서 이 핸드로 숏스택 올인을 넣는 것은 수학적 재앙입니다."; }
+                    if (isPremPair && !['J','T'].includes(r1) || core === 'AK') { setFreq(100, 0); strategy = "[멀티팟 올인] 강력한 탑 티어 레인지입니다. 멀티웨이 생존을 위해 올인합니다."; } 
+                    else { setFreq(0, 0); strategy = "3-Bet 멀티 팟에서 어설픈 핸드로 숏스택 칩을 넣는 것은 수학적 자살입니다."; }
                 }
             } 
             // ==========================================
-            // 2. 딥스택 상황 (50bb+)
+            // 2. 미들~딥 스택 (30bb~100bb+)
             // ==========================================
             else {
                 document.getElementById('raiseLabel').innerText = "Raise";
@@ -315,131 +365,108 @@
                 // --- 앞자리 액션 없음 (오픈/림프) ---
                 if (state.facing === 'none') {
                     if (state.pos === 'BB') {
-                        if (isPair && ['A','K','Q','J','T'].includes(r1) || ['AK','AQ'].includes(core)) { setFreq(100, 0); strategy = "[BB 아이솔레이션] 림퍼 응징을 위해 강력하게 100% 레이즈를 날립니다."; } 
-                        else if (['AJ','AT','KQ','KJ'].includes(core) || (isSuited && ['QJ','JT','T9'].includes(core))) { 
-                            let rFreq = 41.5 + (posIdx * 2.1); 
-                            if(isTough) rFreq *= 0.7; // 터프하면 압박을 덜함
+                        if (isPremPair || isPremSuited || isPremOffsuit) { setFreq(100, 0); strategy = "[BB 아이솔레이션] 림퍼 응징을 위해 강력하게 100% 레이즈를 날립니다."; } 
+                        else if (isMidPair || isStrongSuited || isStrongOffsuit || isAxSuited) { 
+                            let rFreq = 35.0 + (posIdx * 3.5); 
+                            if(isTough) rFreq *= 0.6; 
                             setFreq(rFreq, 100 - rFreq); strategy = `[혼합 방어] ${rFreq.toFixed(1)}% 빈도로 레이즈 압박을 넣고, 나머지는 체크로 공짜 플랍을 봅니다.`; 
                         } 
                         else { setFreq(0, 100); strategy = "[BB 무료 플랍] 무리하지 않고 체크하여 공짜 카드를 봅니다."; }
                     } else { 
-                        if (isPair && ['A','K','Q','J'].includes(r1) || core === 'AK' || (isSuited && ['AQ','AJ'].includes(core))) { setFreq(100, 0); strategy = "밸류 최상단 라인입니다. 100% 빈도로 오픈 레이즈하여 팟을 키웁니다."; } 
-                        else if (isPair && ['T','9','8','7'].includes(r1) || (isSuited && ['AT','KQ','KJ','QJ'].includes(core))) { 
-                            let cFreq = 12.3 + (5 - posIdx) * 1.5; 
-                            if(isTough) cFreq = 0; // 터프한 방에선 림프 트랩 미사용
-                            setFreq(100 - cFreq, cFreq); strategy = "기본 오픈 레이즈이나 밸런싱을 위해 소폭의 림프(Call) 트랩을 섞습니다."; 
+                        if (isPremPair || isPremSuited || isPremOffsuit) { setFreq(100, 0); strategy = "최상단 밸류 라인입니다. 100% 빈도로 오픈 레이즈하여 팟을 키웁니다."; } 
+                        else if (isMidPair || isStrongSuited) { 
+                            let cFreq = (effStack >= 100 && !isTough) ? 12.0 + (5 - posIdx)*2 : 0; 
+                            setFreq(100 - cFreq, cFreq); strategy = "기본 오픈 레이즈 레인지입니다. " + (cFreq > 0 ? "딥스택 밸런싱을 위해 림프 트랩을 소폭 섞습니다." : ""); 
                         }
-                        else if (['AQ','AJ','AT','KQ','KJ'].includes(core) || (isSuited && ['QT','JT','T9','98','87'].includes(core))) {
-                            let rFreq = 15.2 + (posIdx * 16.8); 
-                            if(isTough) rFreq *= 0.6; // 💡 몬스터(터프) 성향 시 오픈 마진 대폭 감소
+                        else if (isStrongOffsuit || isBroadOffsuit || isAxSuited || isSuitedConn || isLowPair) {
+                            let rFreq = (posIdx * 18.5) + (effStack === 100 ? 8 : 0); 
+                            if(isTough) rFreq *= 0.5; 
+                            if(rFreq > 95) rFreq = 95;
                             setFreq(rFreq, 0);
-                            strategy = `포지션 스틸 가중치. 현재 자리(${state.pos})에서는 약 ${rFreq.toFixed(1)}% 오픈을 권장합니다. ${isTough ? '(터프한 테이블에 맞춰 폴드 비중을 높였습니다.)' : ''}`;
+                            strategy = `스틸 가중치 적용. 현재 자리(${state.pos})에서는 약 ${rFreq.toFixed(1)}% 오픈을 권장합니다.`;
                         } else { setFreq(0,0); }
                     }
                 } 
                 // --- 앞자리 1 레이즈 나옴 (방어) ---
                 else if (state.facing === 'raise') {
-                    if (isPair && ['A','K'].includes(r1)) { setFreq(82.4, 17.6); strategy = "AA, KK 블록입니다. 3-Bet 위주로 플레이하되 가끔 플랫하여 트랩을 설계합니다."; }
-                    
-                    else if (core === 'AK') { 
-                        if(isSuited) { setFreq(68.5, 31.5); strategy = "AKs입니다. 포스트플랍 보드 장악력이 뛰어나 70% 3-Bet 레이즈로 공격합니다."; }
-                        else { 
-                            let rFreq = 58.2 + (posIdx*1.2); let cFreq = 41.8 - (posIdx*1.2);
-                            if(isTough) { rFreq *= 0.8; cFreq *= 0.8; } // 터프한방 AKo 방어 대폭 감소
-                            setFreq(rFreq, cFreq); strategy = "AKo입니다. 수티드보다 운영이 제한되어 3-Bet 빈도를 살짝 줄이고 플랫 비중을 높입니다."; 
-                        }
-                    }
-                    else if (core === 'AQ') {
-                        if(isSuited) {
-                            let rFreq = 28.5 + (posIdx * 4.2); let cFreq = 52.1 + (posIdx * 2.8);
-                            if(state.pos === 'SB') { rFreq += 15.3; cFreq -= 20.1; } 
-                            if(isTough) cFreq *= 0.7; // 터프하면 콜방어 축소
-                            setFreq(rFreq, cFreq);
-                            strategy = "AQs입니다. 포지션 이점에 따라 블러프 3-Bet 빈도와 팟 오즈 콜 빈도가 수학적으로 조정됩니다.";
+                    if (isPremPair) {
+                        if(['Q','J','T'].includes(r1)) {
+                            let rFreq = isBlinds ? 75 : (30 + posIdx*5); let cFreq = 100 - rFreq;
+                            if(isTough) { rFreq *= 0.8; cFreq *= 0.8; } 
+                            setFreq(rFreq, cFreq); strategy = "미들/하이 페어입니다. 블라인드에선 스퀴즈 빈도를 높이고, 인포지션에선 셋마이닝 콜을 섞습니다.";
                         } else {
-                            let cFreq = 14.2 + (posIdx * 5.1); let rFreq = 8.5 + (posIdx * 2.4);
-                            if(isTough) { cFreq *= 0.4; rFreq *= 0.5; }
-                            
-                            if(['EP','MP'].includes(state.pos)) { setFreq(0, 0); strategy = "AQo 얼리 포지션. 도미네이트 위험이 높아 GTO 상 100% 폴드입니다."; }
-                            else { setFreq(rFreq, cFreq); strategy = "AQo 방어. 오프수트 특성상 잦은 폴드가 섞이며, 인포지션에서만 제한적으로 콜/레이즈를 배정합니다."; }
+                            setFreq(85.5, 14.5); strategy = "AA, KK 블록입니다. 3-Bet 위주로 플레이하되, 가끔 딥스택 플랫 트랩을 설계합니다."; 
                         }
                     }
-                    else if (core === 'AT') {
-                        if(isSuited) {
-                            let rFreq = 7.4 + (posIdx * 3.1); let cFreq = 38.2 + (posIdx * 6.5);
-                            if(state.pos === 'BB') { cFreq += 18.5; } 
-                            if(isTough) { cFreq *= 0.5; rFreq *= 0.5; }
-                            setFreq(rFreq, cFreq);
-                            strategy = "ATs입니다. 포지션이 늦을수록, 블라인드일수록 방어 레인지에 편입되어 빈도가 정밀하게 올라갑니다.";
-                        } else {
-                            let rFreq = 4.2; let cFreq = 18.7;
-                            if(isTough) { rFreq = 0; cFreq = 0; } // 터프방 ATo 전면 폐기
-                            if(['BTN', 'BB'].includes(state.pos)) { setFreq(rFreq, cFreq); strategy = "ATo 마진 핸드. 배당이 좋은 늦은 포지션에서만 아주 가끔 콜이나 블러프 3-Bet을 칩니다."; }
-                            else { setFreq(0, 0); strategy = "ATo 오프수트. 타이트한 오픈을 상대로 키커 싸움이 불가하여 기계적으로 폴드합니다."; }
-                        }
+                    else if (isPremSuited) { 
+                        let rFreq = 45 + (posIdx * 4); let cFreq = 55 - (posIdx * 4);
+                        if(isBlinds) { rFreq += 20; cFreq -= 20; }
+                        if(isTough) cFreq *= 0.6;
+                        if(core === 'AK') { rFreq = 75; cFreq = 25; } 
+                        setFreq(rFreq, cFreq); strategy = "프리미엄 수티드입니다. 포지션 이점과 블라인드 여부에 따라 3-Bet 밸류와 팟 오즈 콜이 수학적으로 분배됩니다.";
                     }
-                    else if (isPair && ['Q','J','T'].includes(r1)) {
-                        if (isBlinds) { setFreq(72.5, 27.5); strategy = "블라인드 방어. 아웃포지션 핸디캡을 깨기 위해 3-Bet(스퀴즈) 비중을 70% 이상 올립니다."; } 
-                        else { 
-                            let cFreq = 60.2 + (posIdx*1.5);
-                            if(isTough) cFreq *= 0.8;
-                            setFreq(28.4 + (posIdx*2.1), cFreq); strategy = "미들/하이 페어입니다. 인포지션 셋마이닝 가치가 뛰어나 플랫(Call) 비중을 대폭 높입니다."; }
+                    else if (isPremOffsuit) {
+                        let rFreq = 35 + (posIdx * 2); let cFreq = 25 + (posIdx * 3);
+                        if(isTough) { rFreq *= 0.5; cFreq *= 0.5; }
+                        if(core === 'AK') { rFreq = 65; cFreq = 35; }
+                        else if(['EP','MP'].includes(state.pos)) { rFreq = 0; cFreq = 0; } 
+                        setFreq(rFreq, cFreq); strategy = "프리미엄 오프수트 방어. 수티드보다 에퀴티가 낮아 빈도를 깎으며, 특히 불리한 자리에선 전면 폴드가 섞입니다.";
                     }
-                    else if (isPair && ['9','8','7','6'].includes(r1)) { 
-                        let cFreq = 78.4 + (posIdx*1.8);
-                        if(isTough) cFreq *= 0.6; // 로우페어 셋마이닝 가치 하락
-                        setFreq(8.5, cFreq); strategy = "미들/로우 페어. 주 목적은 세트를 맞추는 것이므로 대부분 콜만 받습니다."; 
+                    else if (isStrongSuited || isAxSuited || isSuitedConn) {
+                        let cFreq = (posIdx * 10) + (isBlinds ? 15 : 0);
+                        let rFreq = (posIdx * 4);
+                        if(isTough || effStack < 60) { cFreq *= 0.4; rFreq *= 0.4; } 
+                        setFreq(rFreq, cFreq); strategy = "드로우 포텐셜이 있는 수티드 라인입니다. 딥스택 & 뒷자리일수록 콜 빈도가 극적으로 상승합니다.";
                     }
-                    else if (isSuited && ['AJ','KJ','KQ','QJ','JT','T9'].includes(core)) { 
-                        let cFreq = 45.2 + (posIdx * 8.4); 
-                        if(isTough) cFreq *= 0.5;
-                        setFreq(14.8, cFreq); strategy = "수티드 브로드웨이 라인. IP일수록 포스트플랍 플러시/스트레이트 구현이 용이해 콜 빈도가 크게 상승합니다."; 
+                    else if (isMidPair || isLowPair) {
+                        let cFreq = 60 + (posIdx * 5);
+                        if(effStack < 60 || isTough) cFreq *= 0.3; 
+                        setFreq(5.5, cFreq); strategy = "로우/미들 페어 셋마이닝. 딥스택일 때만 임플라이드 오즈 배당이 성립하며, 스택이 짧으면 폴드해야 합니다.";
                     }
-                    else if (!isSuited && ['AJ','KQ'].includes(core)) {
-                        let cFreq = 28.5; let rFreq = 6.4;
-                        if(isTough) { cFreq = 0; rFreq = 0; }
-                        if (['BTN', 'CO', 'BB'].includes(state.pos)) { setFreq(rFreq, cFreq); strategy = "오프수트 브로드웨이. 배당이 허락하는 뒷자리에서만 방어를 시도하고 대부분 폴드합니다."; }
-                        else { setFreq(0, 0); strategy = "얼리 포지션에서의 마지널 오프수트는 EV 분쇄기입니다. 100% 폴드하세요."; }
+                    else if (isStrongOffsuit || isBroadOffsuit) {
+                        let cFreq = (isIP || isBlinds) ? 20.5 : 0;
+                        if(isTough || effStack < 100) cFreq = 0; 
+                        setFreq(0, cFreq); strategy = "도미네이션 위험이 높은 마지널 오프수트. 완벽한 상황이 아니면 칩이 녹아내리므로 대부분 기계적 폴드합니다.";
                     }
                     else { setFreq(0,0); }
                 } 
-                // --- 3. 앞자리 멀티 베팅 상황 ---
+                // --- 3. 앞자리 멀티 베팅 상황 (3-Bet 이상) ---
                 else {
-                    if (isPair && ['A','K'].includes(r1)) { setFreq(100, 0); strategy = "[스퀴즈 크러시] 에쿼티 최상단입니다. 고민하지 않고 100% 4-Bet 리잼으로 돌려줍니다."; }
-                    
-                    else if (core === 'AK' || (isPair && ['Q','J'].includes(r1))) { 
-                        if (isSuited || isPair) { 
-                            let rFreq = 38.5 + (posIdx * 2.1); let cFreq = 61.5 - (posIdx * 2.1);
-                            if(isTough) cFreq *= 0.7;
-                            setFreq(rFreq, cFreq); 
-                            strategy = "강력한 프리미엄 수티드/페어 라인입니다. 4-Bet 밸류와 팟 오즈 콜을 포지션에 맞춰 정밀하게 믹싱합니다."; 
-                        } else { 
-                            if (isIP) {
-                                let cFreq = 38.5 + (posIdx * 3.2); let rFreq = 22.4 + (posIdx * 1.5);
-                                if(isTough) { cFreq *= 0.4; rFreq *= 0.6; } // 터프한방 AKo 방어 대폭 감소
-                                setFreq(rFreq, cFreq); 
-                                strategy = "AKo 인포지션. 포스트플랍 포지션 이점을 살려 콜 방어를 높이고 4-Bet 스퀴즈를 적절히 섞어줍니다.";
-                            } else {
-                                let rFreq = 41.2 - (posIdx * 1.5); let cFreq = 5.2; 
-                                if(isTough) rFreq *= 0.5;
-                                setFreq(rFreq, cFreq); 
-                                strategy = "AKo 아웃포지션. 콜만 받고 멀티웨이를 가면 지옥입니다. 4-Bet으로 끝내버리거나 아예 폴드하는 양극화 전략을 씁니다.";
-                            }
+                    if (isPremPair) {
+                        if(['Q','J'].includes(r1)) {
+                            let rFreq = 40 + (posIdx * 2); let cFreq = 60 - (posIdx * 2);
+                            if(isTough || effStack < 60) cFreq *= 0.4;
+                            setFreq(rFreq, cFreq); strategy = "QQ, JJ의 3-Bet 팟 방어. 딥스택일수록 콜로 끊고 포스트플랍을 보며, 아니면 4-Bet으로 압박합니다.";
+                        } else {
+                            setFreq(100, 0); strategy = "[스퀴즈 크러시] 에쿼티 최상단. 고민하지 않고 100% 4-Bet/5-Bet 리잼으로 스택을 집어넣습니다.";
                         }
                     }
-                    else if (isSuited && ['AQ','AJ'].includes(core)) {
-                        let cFreq = 38.4; let rFreq = 12.8;
-                        if(isTough) { cFreq *= 0.3; rFreq = 0; }
-                        if (isIP) { setFreq(rFreq, cFreq); strategy = "인포지션 이점을 살려 AQs, AJs로 제한적인 확률 배당 방어를 수행합니다."; }
-                        else { setFreq(0, 0); strategy = "아웃포지션에서 다중 3-Bet을 맞이한 AQ 수티드는 가치가 폭락합니다. 폴드하여 스택을 지키세요."; }
+                    else if (isPremSuited) { 
+                        let rFreq = 35 + (posIdx * 2); let cFreq = 45;
+                        if(core === 'AK') rFreq += 20;
+                        if(isTough) cFreq *= 0.5;
+                        if(!isIP && core !== 'AK') { rFreq *= 0.5; cFreq = 0; } 
+                        setFreq(rFreq, cFreq); 
+                        strategy = "프리미엄 수티드의 멀티팟 대응. 인포지션에선 콜과 4-Bet을 믹스하고, 아웃포지션에선 양극화(4-Bet or Fold) 합니다."; 
                     }
-                    else { setFreq(0, 0); strategy = "멀티웨이 3-Bet 스퀴즈 팟입니다. 캡이 무너진 레인지이므로 상위 3% 핸드 제외 전면 폴드하십시오."; }
+                    else if (isPremOffsuit) {
+                        if (isIP) {
+                            let rFreq = 25; let cFreq = core === 'AK' ? 40 : 15;
+                            if(isTough) { cFreq = 0; rFreq *= 0.5; }
+                            setFreq(rFreq, cFreq); strategy = "프리미엄 오프수트(IP). 수티드보다 생존율이 낮아 4-Bet과 콜 빈도를 대폭 삭감합니다.";
+                        } else {
+                            let rFreq = core === 'AK' ? 45 : 0; 
+                            setFreq(rFreq, 0); strategy = "프리미엄 오프수트(OOP). 포지션 없이 다중 팟을 콜로 가면 필패합니다. 4-Bet 스퀴즈나 순수 폴드만 존재합니다.";
+                        }
+                    }
+                    else { setFreq(0, 0); strategy = "멀티웨이 3-Bet 스퀴즈 팟입니다. 캡이 무너진 레인지이므로 상위 3% 프리미엄 핸드 제외 전면 폴드하십시오."; }
                 }
             }
 
+            // 추천 사이징 로직
             let sizingStr = "";
             if (fRaise > 0) {
-                if (state.stack === 'short') sizingStr = "ALL-IN (남은 스택 전부 푸시)";
+                if (effStack <= 25) sizingStr = "ALL-IN (스택 전체 푸시)";
                 else if (state.facing === 'none') sizingStr = state.level === 'low' ? "3.5x ~ 4x (오픈 기본 사이즈)" : "2.2x ~ 2.5x (GTO 균형 사이즈)";
                 else if (state.facing === 'raise') sizingStr = isBlinds ? "상대 레이즈의 3.8x ~ 4.2x (OOP 리레이즈)" : "상대 레이즈의 3x (IP 리레이즈)";
                 else if (state.facing === 'multi') sizingStr = "상대 3-Bet 금액의 2.3x ~ 2.5x (4-Bet 사이즈)";
@@ -466,7 +493,7 @@
         }
 
         // ====================================================
-        // [3. 핸드 모의전 미니게임 엔진 (패배 카드 투명도 완전 제거 적용)]
+        // [3. 핸드 모의전 미니게임 엔진]
         // ====================================================
         let gameInitialized = false, streak = 0, maxStreak = 0;
         let deck = [], heroH = [], villainH = [], board = [];
@@ -492,11 +519,11 @@
                     <div class="card-face card-face-back"></div>
                     <div class="card-face card-face-front overflow-hidden">
                         <div class="absolute top-[2px] left-[5px] flex flex-col items-center">
-                            <span class="${col} font-black leading-none tracking-tighter" style="font-size: 1.3em;">${r}</span>
-                            <span class="${col} leading-none mt-[1px]" style="font-size: 0.8em;">${suits[sType].sym}</span>
+                            <span class="${col} font-black leading-none tracking-tighter" style="font-size: 1.4em;">${r}</span>
+                            <span class="${col} leading-none mt-[1px]" style="font-size: 0.9em;">${suits[sType].sym}</span>
                         </div>
-                        <div class="absolute bottom-[0px] right-[4px] flex items-center justify-center">
-                            <span class="${col} opacity-85 leading-none" style="font-size: 2.6em;">${suits[sType].sym}</span>
+                        <div class="absolute bottom-[-8px] right-[1px] flex items-center justify-center">
+                            <span class="${col} opacity-85 leading-none" style="font-size: 3.2em;">${suits[sType].sym}</span>
                         </div>
                     </div>
                 </div>
@@ -586,7 +613,7 @@
             return { score: bestScore, name: bestName, combo: bestCombo };
         }
 
-        // 💡 패배 카드 숨김(투명도) 제거 및 음영 처리 적용 완료
+        // 패배 카드 시인성 확보를 위한 음영 처리
         function applyHighlight(winningCombo, isHeroWin, isVillainWin) {
             const hWraps = document.getElementById('heroCards').querySelectorAll('.card-wrap');
             const vWraps = document.getElementById('villainCards').querySelectorAll('.card-wrap');
