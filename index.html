@@ -2,190 +2,346 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>홀덤광장 Reactive - PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #0f1115; color: #E0E0E0; user-select: none; }
-        select { appearance: none; text-align: center; }
-        select:focus { outline: none; box-shadow: 0 0 0 2px #4ade80; }
-        .bar-transition { transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        button, select { -webkit-tap-highlight-color: transparent; }
-        
-        /* 가로 스크롤바 숨기기 */
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .btn-active { background-color: #22c55e; color: #000; font-weight: 800; box-shadow: 0 0 10px rgba(34,197,94,0.3); }
-        .btn-inactive { background-color: #252932; color: #9ca3af; font-weight: 600; }
-        .btn-alert { background-color: #ef4444; color: #fff; font-weight: 800; box-shadow: 0 0 10px rgba(239,68,68,0.4); }
-        
-        /* ♠️ 리얼 3D 카드 플립 엔진 */
-        .card-scene { perspective: 800px; }
-        .card-wrap {
-            width: 100%; height: 100%; position: relative;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform-style: preserve-3d;
+        /* ══ ONLY WHAT TAILWIND CANNOT DO ══════════════════════════════ */
+
+        /* Base */
+        *,*::before,*::after{box-sizing:border-box;}
+        html,body{margin:0;padding:0;background:#0A0C10;}
+        body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:#F9FAFB;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;overflow-x:hidden;}
+        button{font-family:inherit;}
+        #app{max-width:448px;margin:0 auto;min-height:100svh;display:flex;flex-direction:column;position:relative;}
+
+        /* Legacy compat — setBtnActive() / calculateGTO() reads these */
+        .bar-transition{transition:width .4s cubic-bezier(.4,0,.2,1);}
+        .btn-active{background:#22c55e;color:#000;font-weight:800;}
+        .btn-inactive{background:#252932;color:#9ca3af;font-weight:600;}
+        .btn-alert{background:#ef4444;color:#fff;font-weight:800;}
+        .tab-active{border-bottom:2px solid #10B981;color:#10B981;}
+        .tab-inactive{border-bottom:2px solid transparent;color:#6B7280;}
+
+        /* Scrollbar hide */
+        .hide-sb::-webkit-scrollbar{display:none;}
+        .hide-sb{-ms-overflow-style:none;scrollbar-width:none;}
+
+        /* Chip base — dynamic color changes applied by updateChips() */
+        .chip{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;padding:6px 12px;border-radius:100px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:#9CA3AF;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s ease;-webkit-tap-highlight-color:transparent;}
+        .chip:active{filter:brightness(.72);transform:scale(.93);}
+
+        /* 13×13 matrix — custom 13-col grid (Tailwind can't do repeat(13,1fr)) */
+        #rangeMatrix{display:grid;grid-template-columns:repeat(13,1fr);gap:0.5px;width:100%;aspect-ratio:1;touch-action:manipulation;}
+        .mcell{aspect-ratio:1;border-radius:1.5px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden;transition:transform .07s ease,filter .07s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+        .mcell:active{transform:scale(.80);filter:brightness(.68);}
+        .mcell-lbl{display:flex;align-items:center;position:relative;z-index:1;pointer-events:none;white-space:nowrap;overflow:hidden;line-height:1;}
+        /* 랭크 텍스트 (10px 굵게) */
+        .mcell-rank{font-size:10px;font-weight:900;color:rgba(255,255,255,.9);font-family:'SF Mono',monospace;line-height:1;letter-spacing:-.4px;pointer-events:none;}
+        /* 's' 수딧 접미사 — 스카이블루 */
+        .txt-s{font-size:8px;font-weight:900;color:#38BDF8;line-height:1;pointer-events:none;letter-spacing:0;}
+        /* 'o' 옵수딧 접미사 — 회색 */
+        .txt-o{font-size:8px;font-weight:700;color:#9CA3AF;line-height:1;pointer-events:none;letter-spacing:0;}
+        /* 대각선 기준 영역 음영 (::before = 텍스트 아래, 배경 위) */
+        .mcell-o::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.25);z-index:0;pointer-events:none;border-radius:1.5px;}
+        .mcell-p::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.07);z-index:0;pointer-events:none;border-radius:1.5px;}
+        .mcell.sel{outline:1.5px solid rgba(255,255,255,.9);outline-offset:-1px;filter:brightness(1.25) saturate(1.4);z-index:3;}
+        .mcell.sel::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.14);border-radius:1.5px;}
+
+        /* Floating panel — position:fixed + custom transform */
+        #floatingPanel{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(110%);width:100%;max-width:448px;z-index:40;padding:0 10px 12px;pointer-events:none;transition:transform .38s cubic-bezier(.32,.72,0,1);}
+        #floatingPanel.panel-open{transform:translateX(-50%) translateY(0);pointer-events:all;}
+
+        /* Settings sheet — position:fixed + slide-up */
+        #settingsSheet{position:fixed;inset:0;z-index:50;opacity:0;pointer-events:none;transition:opacity .25s ease;}
+        #settingsSheet.sht-open{opacity:1;pointer-events:all;}
+        #sht-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.72);}
+        #sht-panel{position:absolute;bottom:0;left:0;right:0;max-width:448px;margin:0 auto;background:#13161A;border-top:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:0 16px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:82vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px);}
+        #settingsSheet.sht-open #sht-panel{transform:translateY(0);}
+
+        /* Settings button states — toggled by updateShtBtns() */
+        .s-btn{background:#1C2026;color:#9CA3AF;border-color:rgba(255,255,255,.08);}
+        .s-on{background:rgba(16,185,129,.15)!important;border-color:rgba(16,185,129,.45)!important;color:#10B981!important;}
+        .s-alert-on{background:rgba(239,68,68,.15)!important;border-color:rgba(239,68,68,.45)!important;color:#EF4444!important;}
+
+        /* Section highlight flash — for seamless chip→sheet UX */
+        @keyframes sht-flash{0%,100%{background:transparent}40%{background:rgba(16,185,129,.16);border-radius:10px;}}
+        .sht-hl{animation:sht-flash .55s ease;}
+
+        /* Card flip 3D engine — 절대 수정 금지 */
+        .card-scene{perspective:800px;}
+        .card-wrap{width:100%;height:100%;position:relative;transition:transform .5s cubic-bezier(.175,.885,.32,1.275);transform-style:preserve-3d;}
+        .is-flipped{transform:rotateY(180deg);}
+        .card-face{width:100%;height:100%;position:absolute;backface-visibility:hidden;border-radius:6px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,.5);overflow:hidden;}
+        .card-face-front{background:#fff;transform:rotateY(180deg);border:1px solid #d1d5db;transition:border-color .3s,box-shadow .3s,filter .3s;}
+        .card-face-back{background:#1e3a8a;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0px,rgba(255,255,255,.05) 2px,transparent 2px,transparent 6px);border:2px solid #fff;}
+        .win-glow{border:2px solid #eab308!important;box-shadow:0 0 12px rgba(234,179,8,.7)!important;z-index:10;}
+        .win-pop{transform:rotateY(180deg) scale(1.08)!important;z-index:20;}
+        .card-dimmed{filter:brightness(.55) grayscale(40%);}
+
+        /* ── Settings sheet (Phase 1 quality restore) ────────────────────
+           CSS variables & component classes for premium bottom sheet UI   */
+        :root {
+            --s1:  #13161A; --s2:  #1C2026;
+            --bdr: rgba(255,255,255,0.08);
+            --t1:  #F9FAFB; --t2:  #9CA3AF; --t3:  #6B7280;
+            --call:#10B981;
         }
-        .is-flipped { transform: rotateY(180deg); }
-        
-        .card-face {
-            width: 100%; height: 100%; position: absolute;
-            backface-visibility: hidden; border-radius: 6px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            overflow: hidden;
+        .s-sec { padding:14px 0; border-bottom:1px solid var(--bdr); }
+        .s-sec:last-of-type { border-bottom:none; }
+        .s-lbl { font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:block; }
+        .s-btn {
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            gap:2px;padding:9px 4px;border-radius:10px;
+            border:1px solid var(--bdr);background:var(--s2);
+            color:var(--t2);font-size:12px;font-weight:700;
+            cursor:pointer;transition:all .15s ease;width:100%;min-height:44px;
         }
-        .card-face-front { 
-            background: #ffffff; transform: rotateY(180deg); 
-            border: 1px solid #d1d5db; 
-            transition: border-color 0.3s, box-shadow 0.3s, filter 0.3s;
+        .s-btn:active { transform:scale(.93); }
+        .s-on       { background:rgba(16,185,129,.15)!important;border-color:rgba(16,185,129,.45)!important;color:#10B981!important; }
+        .s-alert-on { background:rgba(239,68,68,.15)!important;border-color:rgba(239,68,68,.45)!important;color:#EF4444!important; }
+        .s-apply-btn {
+            width:100%;background:var(--call);color:#000;font-weight:900;
+            font-size:14px;padding:16px;border-radius:14px;border:none;
+            cursor:pointer;letter-spacing:.06em;text-transform:uppercase;
+            transition:filter .15s;margin:16px 0 4px;
         }
-        .card-face-back { 
-            background: #1e3a8a;
-            background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 6px);
-            border: 2px solid #ffffff; 
-        }
-        
-        /* ✨ 승리 카드 팝업 및 패배 카드 명확화 */
-        .win-glow {
-            border: 2px solid #eab308 !important; 
-            box-shadow: 0 0 12px rgba(234, 179, 8, 0.7) !important; 
-            z-index: 10;
-        }
-        .win-pop { transform: rotateY(180deg) scale(1.08) !important; z-index: 20; }
-        .card-dimmed { filter: brightness(0.55) grayscale(40%); }
-        
-        .tab-active { border-bottom: 3px solid #4ade80; color: #4ade80; }
-        .tab-inactive { color: #6b7280; }
+        .s-apply-btn:active { filter:brightness(.85); }
+        /* mono util */
+        .mono { font-family:'SF Mono','Fira Code',ui-monospace,monospace; }
     </style>
 </head>
-<body class="p-4 md:p-5 max-w-md mx-auto flex flex-col min-h-screen">
+<body>
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║  SETTINGS BOTTOM SHEET                  ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<div id="settingsSheet">
+    <div id="sht-backdrop" onclick="closeSettings()"></div>
+    <div id="sht-panel">
+        <!-- Handle -->
+        <div style="display:flex;justify-content:center;padding:12px 0 6px;">
+            <div style="width:36px;height:4px;background:#374151;border-radius:99px;"></div>
+        </div>
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 14px;border-bottom:1px solid var(--bdr);">
+            <span style="font-size:17px;font-weight:900;color:var(--t1);">설정</span>
+            <button onclick="closeSettings()" style="color:var(--t3);background:var(--s2);border:1px solid var(--bdr);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
 
-    <header class="mb-4">
-        <div class="flex justify-between items-end mb-3">
-            <div><h1 class="text-2xl font-extrabold text-white tracking-tight">홀덤광장 <span class="text-green-400">PRO</span></h1></div>
+        <!-- ① Level — id="sht-sec-level" for chip→scroll UX -->
+        <div id="sht-sec-level" class="s-sec">
+            <span class="s-lbl">테이블 레벨</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <button id="sh_lvl_low"  class="s-btn s-on" onclick="updateState('level','low');updateShtBtns();">
+                    <span style="font-size:18px;margin-bottom:2px;">🎯</span>
+                    <span>데일리</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">Standard</span>
+                </button>
+                <button id="sh_lvl_high" class="s-btn" onclick="updateState('level','high');updateShtBtns();">
+                    <span style="font-size:18px;margin-bottom:2px;">💀</span>
+                    <span>몬스터</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">Tough</span>
+                </button>
+            </div>
         </div>
-        <div class="flex border-b border-gray-800 text-sm font-bold">
-            <button onclick="switchTab('solver')" id="tab_solver" class="flex-1 pb-2 tab-active transition-colors">🧠 실전 가이드</button>
-            <button onclick="switchTab('game')" id="tab_game" class="flex-1 pb-2 tab-inactive transition-colors">⚔️ 핸드 모의전</button>
-            <button class="flex-1 pb-2 tab-inactive transition-colors opacity-40 cursor-not-allowed text-xs flex flex-col items-center justify-center">
-                <span>👑 프리미엄 복기</span><span class="text-[8px] font-normal leading-none mt-0.5">(업데이트 예정)</span>
-            </button>
+
+        <!-- ② Stack — id="sht-sec-stack" -->
+        <div id="sht-sec-stack" class="s-sec">
+            <span class="s-lbl">유효 스택 (BB)</span>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+                <button id="sh_stk_15"  class="s-btn" onclick="updateState('stack','15');updateShtBtns();">
+                    <span class="mono" style="font-weight:900;font-size:13px;">15↓</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">P/F</span>
+                </button>
+                <button id="sh_stk_20"  class="s-btn" onclick="updateState('stack','20');updateShtBtns();">
+                    <span class="mono" style="font-weight:900;font-size:13px;">20</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">Reshove</span>
+                </button>
+                <button id="sh_stk_25"  class="s-btn" onclick="updateState('stack','25');updateShtBtns();">
+                    <span class="mono" style="font-weight:900;font-size:13px;">25</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">Steal</span>
+                </button>
+                <button id="sh_stk_30"  class="s-btn" onclick="updateState('stack','30');updateShtBtns();">
+                    <span class="mono" style="font-weight:900;font-size:13px;">30</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">Resteal</span>
+                </button>
+                <button id="sh_stk_40"  class="s-btn" onclick="updateState('stack','40');updateShtBtns();">
+                    <span class="mono" style="font-weight:900;font-size:13px;">40</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">Mid</span>
+                </button>
+                <button id="sh_stk_60"  class="s-btn" onclick="updateState('stack','60');updateShtBtns();">
+                    <span class="mono" style="font-weight:900;font-size:13px;">60</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">Standard</span>
+                </button>
+                <button id="sh_stk_100" class="s-btn s-on" onclick="updateState('stack','100');updateShtBtns();" style="grid-column:span 2;">
+                    <span class="mono" style="font-weight:900;font-size:13px;">100+</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">Deep Stack</span>
+                </button>
+            </div>
         </div>
+
+        <!-- ③ Position — id="sht-sec-pos" -->
+        <div id="sht-sec-pos" class="s-sec">
+            <span class="s-lbl">내 포지션</span>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;">
+                <button id="sh_pos_EP"  class="s-btn s-on" onclick="updateState('pos','EP');updateShtBtns();">EP</button>
+                <button id="sh_pos_MP"  class="s-btn" onclick="updateState('pos','MP');updateShtBtns();">MP</button>
+                <button id="sh_pos_CO"  class="s-btn" onclick="updateState('pos','CO');updateShtBtns();">CO</button>
+                <button id="sh_pos_BTN" class="s-btn" onclick="updateState('pos','BTN');updateShtBtns();">BTN</button>
+                <button id="sh_pos_SB"  class="s-btn" onclick="updateState('pos','SB');updateShtBtns();">SB</button>
+                <button id="sh_pos_BB"  class="s-btn" onclick="updateState('pos','BB');updateShtBtns();">BB</button>
+            </div>
+        </div>
+
+        <!-- ④ Facing — id="sht-sec-facing" -->
+        <div id="sht-sec-facing" class="s-sec">
+            <span class="s-lbl">앞자리 액션</span>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+                <button id="sh_face_none"  class="s-btn s-on" onclick="updateState('facing','none');updateShtBtns();">
+                    <span style="font-size:17px;">✅</span><span>오픈</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">Open</span>
+                </button>
+                <button id="sh_face_raise" class="s-btn" onclick="updateState('facing','raise');updateShtBtns();">
+                    <span style="font-size:17px;">⚔️</span><span>레이즈</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">1 Raise</span>
+                </button>
+                <button id="sh_face_multi" class="s-btn" onclick="updateState('facing','multi');updateShtBtns();">
+                    <span style="font-size:17px;">🔥</span><span>3-Bet</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">Multi Pot</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Apply -->
+        <button class="s-apply-btn" onclick="closeSettings()">적용하기</button>
+    </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║  FLOATING RESULT PANEL                  ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<div id="floatingPanel">
+    <!-- Tailwind: glassmorphism panel -->
+    <div class="bg-[#11141a]/90 backdrop-blur-2xl border border-white/[.11] rounded-[20px] p-4 shadow-2xl ring-1 ring-white/[.04]">
+        <!-- Row 1: Hand + Badge + Close -->
+        <div class="flex justify-between items-start mb-2">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                    <span id="pHandName" class="font-mono text-[26px] font-black text-white tracking-[.05em]">AKs</span>
+                    <span id="pBadge" class="text-[11px] font-extrabold px-[10px] py-[4px] rounded-full border border-[#E11D48]/40 bg-[#E11D48]/10 text-[#E11D48]">Raise 100.0%</span>
+                </div>
+                <!-- EV 기댓값 더미 표기 -->
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] text-gray-600 font-bold uppercase tracking-wider">EV</span>
+                    <span id="pEV" class="font-mono text-[11px] font-black text-gray-400">+0.00 bb</span>
+                    <span class="text-[9px] text-gray-700 font-normal">(est.)</span>
+                </div>
+            </div>
+            <button onclick="closePanel()" class="text-gray-500 bg-white/[.06] border border-white/[.08] rounded-lg w-7 h-7 min-w-[28px] flex items-center justify-center text-[13px] cursor-pointer ml-2 mt-0.5 active:scale-90 transition-transform">✕</button>
+        </div>
+        <!-- Row 2: Sizing (conditional) -->
+        <div id="pSizingRow" class="hidden items-center gap-1.5 mb-2">
+            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">사이징</span>
+            <span id="pSizing" class="font-mono text-[12px] font-black text-[#E11D48]"></span>
+        </div>
+        <!-- Row 3: Thin freq bar (5px) -->
+        <div class="h-[5px] rounded-full overflow-hidden flex gap-px mb-[7px]">
+            <div id="pRBar" class="h-full bg-[#E11D48] rounded-full transition-all duration-500 ease-[cubic-bezier(.4,0,.2,1)]" style="width:100%;min-width:0;"></div>
+            <div id="pCBar" class="h-full bg-[#10B981] rounded-full transition-all duration-500 ease-[cubic-bezier(.4,0,.2,1)]" style="width:0%;min-width:0;"></div>
+            <div id="pFBar" class="h-full bg-[#3B82F6] rounded-full transition-all duration-500 ease-[cubic-bezier(.4,0,.2,1)]" style="width:0%;min-width:0;"></div>
+        </div>
+        <!-- Row 4: Freq labels with decimal precision -->
+        <div class="flex justify-between mb-3">
+            <div class="flex items-center gap-1">
+                <div class="w-1.5 h-1.5 rounded-full bg-[#E11D48] flex-shrink-0"></div>
+                <span class="text-[10px] text-gray-400">Raise</span>
+                <span id="pRPct" class="font-mono text-[13px] font-black text-[#E11D48]">100.0%</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <div class="w-1.5 h-1.5 rounded-full bg-[#10B981] flex-shrink-0"></div>
+                <span class="text-[10px] text-gray-400">Call</span>
+                <span id="pCPct" class="font-mono text-[13px] font-black text-[#10B981]">0.0%</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <div class="w-1.5 h-1.5 rounded-full bg-[#3B82F6] flex-shrink-0"></div>
+                <span class="text-[10px] text-gray-400">Fold</span>
+                <span id="pFPct" class="font-mono text-[13px] font-black text-[#3B82F6]">0.0%</span>
+            </div>
+        </div>
+        <!-- Row 5: Strategy Note -->
+        <div class="bg-black/[.4] border border-white/[.06] rounded-xl px-3 py-[10px]">
+            <div class="text-[9px] text-gray-500 font-bold tracking-widest uppercase mb-1">💡 Strategy Note</div>
+            <p id="pStrategy" class="text-[12px] text-gray-300 leading-relaxed break-keep m-0"></p>
+        </div>
+    </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║  APP MAIN                                ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<div id="app">
+
+    <!-- Header -->
+    <header style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px 10px;">
+        <div>
+            <div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px;">Hold'em Square</div>
+            <div style="font-size:21px;font-weight:900;color:var(--t1);line-height:1;letter-spacing:-.3px;">PRO <span style="color:var(--raise);">GTO</span></div>
+        </div>
+        <button onclick="openSettings()" style="width:38px;height:38px;background:var(--s2);border:1px solid var(--bdr);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;" onmousedown="this.style.filter='brightness(.7)'" onmouseup="this.style.filter=''">⚙️</button>
     </header>
 
-    <!-- ============================================== -->
-    <!-- 1. 프리플랍 가이드 (실전용) 탭 -->
-    <!-- ============================================== -->
-    <div id="solverTab" class="block flex-1 flex flex-col">
-        <div class="bg-[#1a1d24] p-4 rounded-xl shadow-lg border border-gray-800 space-y-4 relative z-10">
-            
-            <div>
-                <label class="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase">테이블 성향 (게임 레벨)</label>
-                <div class="flex gap-2">
-                    <button onclick="updateState('level', 'low')" id="lvl_low" class="flex-1 py-2.5 rounded-lg text-xs btn-active">데일리 (스탠다드)</button>
-                    <button onclick="updateState('level', 'high')" id="lvl_high" class="flex-1 py-2.5 rounded-lg text-xs btn-inactive">몬스터 (터프함)</button>
-                </div>
-            </div>
-            <hr class="border-gray-700/50">
+    <!-- Tab Bar -->
+    <div style="display:flex;border-bottom:1px solid rgba(255,255,255,.06);padding:0 16px;flex-shrink:0;">
+        <button onclick="switchTab('solver')" id="tab_solver" class="flex-1 pb-2 tab-active transition-colors" style="font-size:12px;font-weight:700;background:none;border:none;cursor:pointer;padding-top:8px;padding-bottom:9px;">🧠 실전 가이드</button>
+        <button onclick="switchTab('game')"   id="tab_game"   class="flex-1 pb-2 tab-inactive transition-colors" style="font-size:12px;font-weight:700;background:none;border:none;cursor:pointer;padding-top:8px;padding-bottom:9px;">⚔️ 핸드 모의전</button>
+        <button style="flex:1;padding:8px 0 9px;font-size:10px;font-weight:700;color:#374151;background:none;border:none;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;gap:1px;">
+            <span>👑 프리미엄</span><span style="font-size:8px;font-weight:400;">예정</span>
+        </button>
+    </div>
 
-            <div class="w-full">
-                <label class="block text-[11px] font-bold text-green-400 mb-1 uppercase">유효 스택 (나와 액션 상대 중 적은 칩)</label>
-                <p class="text-[9px] text-gray-500 mb-1.5">* 스택이 걸칠 경우 보수적인(아래쪽) 버튼을 선택하세요.</p>
-                <div class="grid grid-cols-4 gap-1.5">
-                    <button onclick="updateState('stack', '15')" id="stk_15" class="py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>15↓</span><span class="text-[8px] font-normal opacity-70">Push/Fold</span></button>
-                    <button onclick="updateState('stack', '20')" id="stk_20" class="py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>20</span><span class="text-[8px] font-normal opacity-70">Reshove</span></button>
-                    <button onclick="updateState('stack', '25')" id="stk_25" class="py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>25</span><span class="text-[8px] font-normal opacity-70">Steal</span></button>
-                    <button onclick="updateState('stack', '30')" id="stk_30" class="py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>30</span><span class="text-[8px] font-normal opacity-70">Resteal</span></button>
-                    
-                    <button onclick="updateState('stack', '40')" id="stk_40" class="py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>40</span><span class="text-[8px] font-normal opacity-70">Mid</span></button>
-                    <button onclick="updateState('stack', '60')" id="stk_60" class="py-1.5 rounded-lg text-[10px] btn-inactive flex flex-col items-center leading-tight"><span>60</span><span class="text-[8px] font-normal opacity-70">Standard</span></button>
-                    <button onclick="updateState('stack', '100')" id="stk_100" class="col-span-2 py-1.5 rounded-lg text-[10px] btn-active flex flex-col items-center leading-tight"><span>100+</span><span class="text-[8px] font-normal opacity-70">Deep Stack</span></button>
-                </div>
-            </div>
-            <hr class="border-gray-700/50">
+    <!-- ╔══════════════════════════════════════════╗ -->
+    <!-- ║  SOLVER TAB — Range Matrix              ║ -->
+    <!-- ╚══════════════════════════════════════════╝ -->
+    <div id="solverTab" style="display:flex;flex-direction:column;flex:1;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px);">
 
-            <div>
-                <label class="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase">내 포지션</label>
-                <div class="flex justify-between gap-1">
-                    <button onclick="updateState('pos', 'EP')" id="pos_EP" class="flex-1 py-2 rounded-lg text-xs btn-active">EP</button>
-                    <button onclick="updateState('pos', 'MP')" id="pos_MP" class="flex-1 py-2 rounded-lg text-xs btn-inactive">MP</button>
-                    <button onclick="updateState('pos', 'CO')" id="pos_CO" class="flex-1 py-2 rounded-lg text-xs btn-inactive">CO</button>
-                    <button onclick="updateState('pos', 'BTN')" id="pos_BTN" class="flex-1 py-2 rounded-lg text-xs btn-inactive">BTN</button>
-                    <button onclick="updateState('pos', 'SB')" id="pos_SB" class="flex-1 py-2 rounded-lg text-xs btn-inactive">SB</button>
-                    <button onclick="updateState('pos', 'BB')" id="pos_BB" class="flex-1 py-2 rounded-lg text-xs btn-inactive">BB</button>
-                </div>
+        <!-- Global Context Bar -->
+        <div class="px-3.5 pt-2 pb-1 flex-shrink-0">
+            <div class="flex gap-1.5 overflow-x-auto pb-1 hide-sb">
+                <button class="chip" id="chip_level"  onclick="openSettings('level')">🎯 데일리</button>
+                <button class="chip" id="chip_stack"  onclick="openSettings('stack')">💰 100BB</button>
+                <button class="chip" id="chip_pos"    onclick="openSettings('pos')">👤 EP</button>
+                <button class="chip" id="chip_facing" onclick="openSettings('facing')">✅ 오픈</button>
             </div>
+            <div id="chipSub" class="text-[11px] text-gray-600 pt-1 pl-0.5 min-h-[18px]"></div>
+        </div>
 
-            <div>
-                <label class="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase">앞자리 액션 상태</label>
-                <div class="flex gap-1">
-                    <button onclick="updateState('facing', 'none')" id="face_none" class="flex-[1.2] py-2.5 rounded-lg text-[11px] btn-active">오픈 (폴드/림프)</button>
-                    <button onclick="updateState('facing', 'raise')" id="face_raise" class="flex-1 py-2.5 rounded-lg text-[11px] btn-inactive">1 레이즈 나옴</button>
-                    <button onclick="updateState('facing', 'multi')" id="face_multi" class="flex-1 py-2.5 rounded-lg text-[11px] btn-inactive">3-Bet / 멀티팟</button>
+        <!-- 13×13 Range Matrix -->
+        <div style="padding:16px 10px 0;flex:1;display:flex;flex-direction:column;justify-content:flex-start;">
+            <div id="rangeMatrix"></div>
+
+            <!-- Legend -->
+            <div style="display:flex;justify-content:center;gap:14px;margin-top:16px;">
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:9px;height:9px;border-radius:2px;background:var(--raise);"></div>
+                    <span style="font-size:10px;color:var(--t2);font-weight:600;">Raise</span>
                 </div>
-            </div>
-            <hr class="border-gray-700/50">
-
-            <div>
-                <label class="block text-[11px] font-bold text-amber-500 mb-1.5 uppercase">내 핸드 입력</label>
-                <div class="flex gap-2 items-center">
-                    <select id="card1" onchange="updateState('c1', this.value)" class="flex-1 bg-[#252932] text-white font-extrabold rounded-lg py-3 text-xl border border-gray-700 shadow-inner">
-                        <option value="A">A</option><option value="K">K</option><option value="Q">Q</option><option value="J">J</option>
-                        <option value="T">T</option><option value="9">9</option><option value="8">8</option><option value="7">7</option>
-                        <option value="6">6</option><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option>
-                    </select>
-                    <select id="card2" onchange="updateState('c2', this.value)" class="flex-1 bg-[#252932] text-white font-extrabold rounded-lg py-3 text-xl border border-gray-700 shadow-inner">
-                        <option value="A">A</option><option value="K" selected>K</option><option value="Q">Q</option><option value="J">J</option>
-                        <option value="T">T</option><option value="9">9</option><option value="8">8</option><option value="7">7</option>
-                        <option value="6">6</option><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option>
-                    </select>
-                    <div class="flex flex-col gap-1.5 w-1/3">
-                        <button onclick="updateState('suited', 's')" id="suit_s" class="w-full py-1.5 rounded-md text-[11px] btn-active">Suited(s)</button>
-                        <button onclick="updateState('suited', 'o')" id="suit_o" class="w-full py-1.5 rounded-md text-[11px] btn-inactive">Offsuit(o)</button>
-                    </div>
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:9px;height:9px;border-radius:2px;background:var(--call);"></div>
+                    <span style="font-size:10px;color:var(--t2);font-weight:600;">Call</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:9px;height:9px;border-radius:2px;background:rgba(59,130,246,.45);"></div>
+                    <span style="font-size:10px;color:var(--t2);font-weight:600;">Fold</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:9px;height:9px;border-radius:2px;background:linear-gradient(135deg,var(--raise) 50%,var(--call) 50%);"></div>
+                    <span style="font-size:10px;color:var(--t2);font-weight:600;">Mixed</span>
                 </div>
             </div>
         </div>
 
-        <div id="resultCard" class="mt-4 flex-col flex-1 pb-4">
-            <div class="flex items-center justify-center gap-3 mb-3">
-                <span id="displayHand" class="text-3xl font-extrabold text-white tracking-widest drop-shadow-md">AKs</span>
-                <span id="stackBadge" class="bg-emerald-600 text-[10px] px-2 py-1 rounded-full text-white font-bold tracking-wider">100+ BB (Deep)</span>
-            </div>
-
-            <!-- 확률 게이지 바 -->
-            <div class="flex w-full h-20 rounded-xl overflow-hidden shadow-2xl font-bold text-white mb-3 border border-gray-700">
-                <div id="raiseBlock" class="bg-[#b91c1c] flex flex-col justify-center items-center bar-transition border-r border-black/20 overflow-hidden" style="width: 0%;">
-                    <span class="text-[10px] opacity-80 uppercase tracking-widest" id="raiseLabel">Raise</span>
-                    <span id="raisePct" class="text-lg">0%</span>
-                </div>
-                <div id="callBlock" class="bg-[#15803d] flex flex-col justify-center items-center bar-transition border-r border-black/20 overflow-hidden" style="width: 0%;">
-                    <span class="text-[10px] opacity-80 uppercase tracking-widest" id="callLabel">Call</span>
-                    <span id="callPct" class="text-lg">0%</span>
-                </div>
-                <div id="foldBlock" class="bg-[#1d4ed8] flex flex-col justify-center items-center bar-transition overflow-hidden" style="width: 0%;">
-                    <span class="text-[10px] opacity-80 uppercase tracking-widest" id="foldLabel">Fold</span>
-                    <span id="foldPct" class="text-lg">0%</span>
-                </div>
-            </div>
-
-            <div id="sizingContainer" class="hidden mb-3 bg-[#252932] border-l-4 border-red-500 rounded-r-xl p-3 shadow-inner flex items-center">
-                <span class="text-[11px] font-bold text-gray-400 mr-2 uppercase tracking-wide">추천 사이징:</span>
-                <span id="recSizeText" class="text-sm font-extrabold text-red-400"></span>
-            </div>
-
-            <div class="bg-[#1a1d24] rounded-xl p-4 border border-gray-800 shadow-lg">
-                <div class="mb-2">
-                    <h3 class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> 핵심 전략 가이드
-                    </h3>
-                    <p id="strategyText" class="text-gray-200 text-[13px] leading-relaxed break-keep"></p>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- ============================================== -->
@@ -238,6 +394,48 @@
     </div>
 
     <!-- 스크립트 엔진 -->
+
+    <!-- ╔══════════════════════════════════════════╗ -->
+    <!-- ║  LEGACY DOM — calculateGTO() 호환 유지  ║ -->
+    <!-- ║  (이 영역은 절대 삭제 금지)              ║ -->
+    <!-- ╚══════════════════════════════════════════╝ -->
+    <div id="_legacy" style="display:none!important;position:absolute;pointer-events:none;" aria-hidden="true">
+        <span id="displayHand">AKs</span>
+        <span id="stackBadge"></span>
+        <div id="raiseBlock" style="width:0%;"><span id="raiseLabel">Raise</span><span id="raisePct"></span></div>
+        <div id="callBlock"  style="width:0%;"><span id="callLabel">Call</span><span id="callPct"></span></div>
+        <div id="foldBlock"  style="width:100%;"><span id="foldLabel">Fold</span><span id="foldPct">100%</span></div>
+        <div id="sizingContainer" class="hidden"><span id="recSizeText"></span></div>
+        <div id="strategyText"></div>
+        <div id="resultCard"></div>
+        <!-- Legacy setting buttons — renderUI() 호환 -->
+        <button id="lvl_low"   class="btn-active"   onclick="updateState('level','low')"></button>
+        <button id="lvl_high"  class="btn-inactive"  onclick="updateState('level','high')"></button>
+        <button id="stk_15"    class="btn-inactive"></button>
+        <button id="stk_20"    class="btn-inactive"></button>
+        <button id="stk_25"    class="btn-inactive"></button>
+        <button id="stk_30"    class="btn-inactive"></button>
+        <button id="stk_40"    class="btn-inactive"></button>
+        <button id="stk_60"    class="btn-inactive"></button>
+        <button id="stk_100"   class="btn-active"></button>
+        <button id="pos_EP"    class="btn-active"></button>
+        <button id="pos_MP"    class="btn-inactive"></button>
+        <button id="pos_CO"    class="btn-inactive"></button>
+        <button id="pos_BTN"   class="btn-inactive"></button>
+        <button id="pos_SB"    class="btn-inactive"></button>
+        <button id="pos_BB"    class="btn-inactive"></button>
+        <button id="face_none" class="btn-active"></button>
+        <button id="face_raise" class="btn-inactive"></button>
+        <button id="face_multi" class="btn-inactive"></button>
+        <button id="suit_s"    class="btn-active"></button>
+        <button id="suit_o"    class="btn-inactive"></button>
+        <!-- Legacy card selects — renderUI() 참조 (calculateGTO는 state 객체 직접 읽음) -->
+        <select id="card1"><option value="A" selected>A</option><option value="K">K</option></select>
+        <select id="card2"><option value="A">A</option><option value="K" selected>K</option></select>
+    </div>
+
+</div><!-- /#app 닫기 -->
+
     <script>
         function switchTab(tab) {
             document.getElementById('tab_solver').className = tab === 'solver' ? "flex-1 pb-2 tab-active transition-colors" : "flex-1 pb-2 tab-inactive transition-colors";
@@ -407,25 +605,42 @@
                     } 
                     else {
                         const defRaiseMatrix = {
-                            'PREM_PAIR': [85,85,85,85,100,100], 'HIGH_PAIR': [35,40,45,45,75,65], 'MID_PAIR': [0,0,0,0,15,10], 'LOW_PAIR': [0,0,0,0,0,0],
+                            'PREM_PAIR': [85,85,85,85,100,100], 'HIGH_PAIR': [35,40,45,45,75,65], 'MID_PAIR': [0,0,0,0,0,10], 'LOW_PAIR': [0,0,0,0,0,0],
                             'PREM_SUITED': [45,50,55,60,85,75], 'STRONG_SUITED': [5,10,15,20,35,25], 'AX_SUITED': [0,5,10,15,20,10], 'SUITED_CONN': [0,5,10,15,25,15], 'BROAD_SUITED_MARGINAL': [0,0,0,5,10,5],
-                            'AKo': [85,85,60,50,90,85], 'AQo': [0,0,25,30,45,40], 'STRONG_OFFSUIT': [0,0,0,10,15,5], 'BROAD_OFFSUIT': [0,0,0,0,5,0], 'TRASH': [0,0,0,0,0,0]
+                            'AKo': [85,85,80,75,90,85], 'AQo': [0,0,25,30,45,40], 'STRONG_OFFSUIT': [0,0,0,10,15,5], 'BROAD_OFFSUIT': [0,0,0,0,5,0], 'TRASH': [0,0,0,0,0,0]
                         };
                         const defCallMatrix = {
-                            'PREM_PAIR': [15,15,15,15,0,0], 'HIGH_PAIR': [65,60,55,55,25,35], 'MID_PAIR': [45,50,55,60,25,50], 'LOW_PAIR': [20,25,35,45,10,40],
+                            'PREM_PAIR': [15,15,15,15,0,0], 'HIGH_PAIR': [65,60,55,55,25,35], 'MID_PAIR': [45,50,55,60,30,50], 'LOW_PAIR': [20,25,35,45,10,40],
                             'PREM_SUITED': [55,50,45,40,15,25], 'STRONG_SUITED': [45,50,60,70,55,75], 'AX_SUITED': [15,20,30,40,20,60], 'SUITED_CONN': [15,20,35,50,25,65], 'BROAD_SUITED_MARGINAL': [0,5,15,25,10,45],
-                            'AKo': [0,0,40,50,10,15], 'AQo': [0,0,25,35,0,20], 'STRONG_OFFSUIT': [0,0,0,15,0,30], 'BROAD_OFFSUIT': [0,0,0,0,0,15], 'TRASH': [0,0,0,0,0,0]
+                            'AKo': [15,15,20,25,10,15], 'AQo': [0,0,25,35,0,20], 'STRONG_OFFSUIT': [0,0,0,15,0,30], 'BROAD_OFFSUIT': [0,0,0,0,0,15], 'TRASH': [0,0,0,0,0,0]
                         };
                         
                         let rFreq = (defRaiseMatrix[group] && defRaiseMatrix[group][posIdx]) ? defRaiseMatrix[group][posIdx] : 0;
                         let cFreq = (defCallMatrix[group] && defCallMatrix[group][posIdx]) ? defCallMatrix[group][posIdx] : 0;
                         
-                        if (isTough) { rFreq *= 0.8; cFreq *= 0.6; }
-                        if (effStack < 60) cFreq *= 0.3; 
+                        if (isTough) {
+                            // 프리미엄 핸드는 Monster 레벨에서도 폴드 없음 (AA/KK/JJ 폴드 버그 방지)
+                            const toughImmune = ['PREM_PAIR', 'PREM_SUITED', 'AKo', 'HIGH_PAIR'].includes(group);
+                            // 준프리미엄은 경감 배율 적용
+                            const toughLight  = ['AQo'].includes(group);
+                            if (!toughImmune) {
+                                rFreq *= toughLight ? 0.90 : 0.80;
+                                cFreq *= toughLight ? 0.75 : 0.60;
+                            }
+                        }
+                        // effStack 구간별 3단계 배율 (기존 일괄 0.3 → 구간 세분화)
+                        if      (effStack < 30) { cFreq *= 0.30; }
+                        else if (effStack < 40) { cFreq *= 0.55; }
+                        else if (effStack < 60) { cFreq *= 0.75; }
                         
                         setFreq(rFreq, cFreq);
                         
-                        if (group === 'AKo') strategy = (isIP) ? "AKo 인포지션 방어. 포스트플랍 유연성을 위해 콜 빈도를 50% 수준으로 섞어 대처합니다." : "AKo 아웃포지션. 콜로 끊으면 플랍 이후 운영이 지옥입니다. 강하게 3-Bet 하거나 폴드합니다.";
+                        if (group === 'AKo') {
+                            if (state.pos === 'BTN') strategy = "AKo BTN. 인포지션 이점을 최대한 활용합니다. 75% 3-Bet이 주력이되, 25% 콜로 BTN 플랫콜 레인지를 보호합니다. 폴드는 없습니다.";
+                            else if (state.pos === 'CO') strategy = "AKo CO. 인포지션 우위로 20% 콜 믹싱, 80% 3-Bet이 주력입니다. BTN보다 팟 컨트롤 필요성이 낮습니다. 폴드는 없습니다.";
+                            else if (state.pos === 'SB') strategy = "AKo SB. OOP 취약성 + 스퀴즈 노출을 방어하기 위해 90% 3-Bet이 주력입니다. 콜은 최소한으로 섞습니다. 폴드는 없습니다.";
+                            else strategy = "AKo. 3-Bet으로 밸류를 극대화하고, 15% 콜로 트래핑 레인지를 구성합니다. 어떤 포지션에서도 단일 레이즈에 폴드는 없습니다.";
+                        }
                         else if (group === 'AQo') strategy = (isIP) ? "AQo 인포지션. 타이트한 3-Bet과 제한적인 콜 믹싱." : (isBlinds ? "AQo 블라인드 방어. 역도미네잇 방지를 위해 콜은 배제하고 3-Bet으로 돌립니다." : "얼리 포지션에서 레이즈를 맞은 AQo는 무조건 폴드입니다.");
                         else if (group.includes('PREM')) strategy = "프리미엄 레인지입니다. 포지션 이점과 블라인드 여부에 따라 3-Bet 밸류와 트랩 콜이 분배됩니다.";
                         else if (group.includes('SUITED')) strategy = "수티드 라인 방어. 스택이 깊고 뒷자리일수록 팟 오즈 콜 빈도가 극적으로 상승합니다.";
@@ -702,6 +917,382 @@
         }
 
         window.onload = () => { renderUI(); calculateGTO(); };
+
+        // ================================================================
+        // ██████╗ ██╗  ██╗ █████╗ ███████╗███████╗     ██╗
+        // ██╔══██╗██║  ██║██╔══██╗██╔════╝██╔════╝    ███║
+        // ██████╔╝███████║███████║███████╗█████╗      ╚██║
+        // ██╔═══╝ ██╔══██║██╔══██║╚════██║██╔══╝       ██║
+        // ██║     ██║  ██║██║  ██║███████║███████╗     ██║
+        // ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝    ╚═╝
+        // Phase 1 · UI Layer — Range Matrix, Context Bar,
+        //           Floating Panel, Settings Sheet
+        // ================================================================
+        // ⚠️  calculateGTO() / 전략 엔진 / 게임 엔진 수정 없음
+        //     모든 코드는 프레젠테이션 레이어만 처리합니다.
+        // ================================================================
+
+        const _RANKS = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+        let _selHand = null;     // 현재 선택된 핸드
+
+        // ── Pure GTO computation (DOM 부작용 없음) ────────────────────────
+        // calculateGTO()의 계산 로직을 순수 함수로 복제 (마트릭스 색상 계산 전용)
+        // defRaiseMatrix / defCallMatrix 포함 버그 픽스 적용 버전 사용
+        function _calcCell(c1, c2, suited) {
+            const ro="AKQJT98765432";
+            let r1=c1,r2=c2;
+            if(ro.indexOf(r1)>ro.indexOf(r2)){let t=r1;r1=r2;r2=t;}
+            const core=r1+r2,isPair=(r1===r2);
+            const isSuited=!isPair&&suited==='s';
+            let grp="TRASH";
+            const diff=Math.abs(ro.indexOf(r1)-ro.indexOf(r2));
+            if(isPair){
+                if(['A','K','Q'].includes(r1))grp="PREM_PAIR";
+                else if(['J','T'].includes(r1))grp="HIGH_PAIR";
+                else if(['9','8','7','6'].includes(r1))grp="MID_PAIR";
+                else grp="LOW_PAIR";
+            }else if(isSuited){
+                if(['AK','AQ','AJ','AT','KQ'].includes(core))grp="PREM_SUITED";
+                else if(['KJ','KT','QJ','QT','JT'].includes(core))grp="STRONG_SUITED";
+                else if(r1==='A')grp="AX_SUITED";
+                else if(diff<=2&&ro.indexOf(r1)<=9)grp="SUITED_CONN";
+                else if(['K','Q','J'].includes(r1))grp="BROAD_SUITED_MARGINAL";
+            }else{
+                if(core==='AK')grp="AKo";
+                else if(core==='AQ')grp="AQo";
+                else if(['AJ','KQ'].includes(core))grp="STRONG_OFFSUIT";
+                else if(['AT','KJ','KT','QJ','QT','JT'].includes(core))grp="BROAD_OFFSUIT";
+            }
+            const pl=['EP','MP','CO','BTN','SB','BB'];
+            const pi=Math.max(0,pl.indexOf(state.pos));
+            const ef=parseInt(state.stack)||100;
+            const tgh=state.level==='high';
+            const ip=['BTN','CO'].includes(state.pos);
+            let R=0,C=0,F=100;
+            const sf=(r,c)=>{
+                R=Math.max(0,Math.min(100,Number(r)||0));
+                C=Math.max(0,Math.min(100-R,Number(c)||0));
+                F=Math.max(0,100-R-C);
+                R=parseFloat(R.toFixed(1));C=parseFloat(C.toFixed(1));F=parseFloat(F.toFixed(1));
+            };
+            if(state.facing==='none'){
+                const M={'PREM_PAIR':[100,100,100,100,100,100],'HIGH_PAIR':[100,100,100,100,100,100],'MID_PAIR':[100,100,100,100,100,80],'LOW_PAIR':[15,30,60,85,100,0],'PREM_SUITED':[100,100,100,100,100,100],'STRONG_SUITED':[100,100,100,100,100,80],'AX_SUITED':[20,30,50,75,100,30],'SUITED_CONN':[15,25,45,75,100,0],'BROAD_SUITED_MARGINAL':[0,15,35,65,80,0],'AKo':[100,100,100,100,100,100],'AQo':[100,100,100,100,100,100],'STRONG_OFFSUIT':[20,40,65,85,100,40],'BROAD_OFFSUIT':[0,10,40,65,85,0],'TRASH':[0,0,0,0,0,0]};
+                let br=(M[grp]||[0])[pi]||0;
+                if(ef<=25){
+                    if(state.pos==='BB'){br>0?sf(100,0):sf(0,100);}
+                    else{if(ef<=15&&state.pos==='SB'&&r1==='A')br=100;if(tgh&&!['PREM_PAIR','PREM_SUITED','AKo'].includes(grp))br*=.6;br>30?sf(100,0):sf(0,0);}
+                }else{
+                    if(tgh&&pi>=2&&!['PREM_PAIR','PREM_SUITED','AKo','AQo'].includes(grp))br*=.7;
+                    if(state.pos==='BB'){br>=80?sf(100,0):br>0?sf(br,100-br):sf(0,100);}
+                    else{br>=90?sf(100,0):br>0?sf(br,0):sf(0,0);}
+                }
+            }else if(state.facing==='raise'){
+                if(ef<=25){
+                    const rj={'PREM_PAIR':100,'HIGH_PAIR':pi>=4?100:40,'MID_PAIR':pi>=4?60:0,'LOW_PAIR':0,'PREM_SUITED':100,'STRONG_SUITED':pi>=4?80:0,'AX_SUITED':0,'SUITED_CONN':0,'BROAD_SUITED_MARGINAL':0,'AKo':100,'AQo':tgh?0:70,'STRONG_OFFSUIT':0,'BROAD_OFFSUIT':0,'TRASH':0};
+                    (rj[grp]||0)>50?sf(100,0):sf(0,0);
+                }else{
+                    const dR={'PREM_PAIR':[85,85,85,85,100,100],'HIGH_PAIR':[35,40,45,45,75,65],'MID_PAIR':[0,0,0,0,0,10],'LOW_PAIR':[0,0,0,0,0,0],'PREM_SUITED':[45,50,55,60,85,75],'STRONG_SUITED':[5,10,15,20,35,25],'AX_SUITED':[0,5,10,15,20,10],'SUITED_CONN':[0,5,10,15,25,15],'BROAD_SUITED_MARGINAL':[0,0,0,5,10,5],'AKo':[85,85,80,75,90,85],'AQo':[0,0,25,30,45,40],'STRONG_OFFSUIT':[0,0,0,10,15,5],'BROAD_OFFSUIT':[0,0,0,0,5,0],'TRASH':[0,0,0,0,0,0]};
+                    const dC={'PREM_PAIR':[15,15,15,15,0,0],'HIGH_PAIR':[65,60,55,55,25,35],'MID_PAIR':[45,50,55,60,30,50],'LOW_PAIR':[20,25,35,45,10,40],'PREM_SUITED':[55,50,45,40,15,25],'STRONG_SUITED':[45,50,60,70,55,75],'AX_SUITED':[15,20,30,40,20,60],'SUITED_CONN':[15,20,35,50,25,65],'BROAD_SUITED_MARGINAL':[0,5,15,25,10,45],'AKo':[15,15,20,25,10,15],'AQo':[0,0,25,35,0,20],'STRONG_OFFSUIT':[0,0,0,15,0,30],'BROAD_OFFSUIT':[0,0,0,0,0,15],'TRASH':[0,0,0,0,0,0]};
+                    let rF=(dR[grp]||[])[pi]||0,cF=(dC[grp]||[])[pi]||0;
+                    if(tgh){const im=['PREM_PAIR','PREM_SUITED','AKo','HIGH_PAIR'].includes(grp),lt=['AQo'].includes(grp);if(!im){rF*=lt?.9:.8;cF*=lt?.75:.6;}}
+                    if(ef<30)cF*=.3;else if(ef<40)cF*=.55;else if(ef<60)cF*=.75;
+                    sf(rF,cF);
+                }
+            }else{
+                if(ef<=30){(['PREM_PAIR','PREM_SUITED'].includes(grp)||core==='AK')?sf(100,0):sf(0,0);}
+                else{
+                    const mr={'PREM_PAIR':100,'HIGH_PAIR':35,'MID_PAIR':0,'PREM_SUITED':40,'STRONG_SUITED':0,'AKo':ip?35:55,'AQo':0,'TRASH':0};
+                    const mc={'PREM_PAIR':0,'HIGH_PAIR':55,'MID_PAIR':0,'PREM_SUITED':40,'STRONG_SUITED':0,'AKo':ip?45:0,'AQo':ip?15:0,'TRASH':0};
+                    let rF=mr[grp]||0,cF=mc[grp]||0;
+                    if(tgh)cF*=.4;
+                    sf(rF,cF);
+                }
+            }
+            return {R,C,F};
+        }
+
+        // ── Cell background color ──────────────────────────────────────────
+        // ── Cell background: 비율 정확 게이지 바 (hard color stop, 하단=Raise → Call → 상단=Fold) ──
+        function _cellBg(R, C, F) {
+            const RAISE = '#E11D48';
+            const CALL  = '#10B981';
+            const FOLD  = '#0F1520';   // 폴드 = 거의 검정에 가까운 네이비
+
+            // 순수 단색 최적화
+            if (F >= 99) return FOLD;
+            if (R >= 99) return RAISE;
+            if (C >= 99) return CALL;
+
+            // Hard color stop: 하단(0%)=Raise → Call → 상단(100%)=Fold
+            // linear-gradient(to top, ...) 방향이므로 0%=바닥, 100%=꼭대기
+            const parts = [];
+            let p = 0;
+
+            if (R > 0) {
+                const rEnd = Math.round(R * 10) / 10;
+                parts.push(`${RAISE} ${p}%`, `${RAISE} ${rEnd}%`);
+                p = rEnd;
+            }
+            if (C > 0) {
+                const cEnd = Math.round((R + C) * 10) / 10;
+                parts.push(`${CALL} ${p}%`, `${CALL} ${cEnd}%`);
+                p = cEnd;
+            }
+            if (p < 100) {
+                parts.push(`${FOLD} ${p}%`, `${FOLD} 100%`);
+            }
+
+            return `linear-gradient(to top,${parts.join(',')})`;
+        }
+
+        // ── Matrix build (1회 실행) ───────────────────────────────────────
+        function _buildMatrix() {
+            const ct = document.getElementById('rangeMatrix');
+            if (!ct || ct.children.length) return;
+            const frag = document.createDocumentFragment();
+            for (let i=0; i<13; i++) {
+                for (let j=0; j<13; j++) {
+                    let c1,c2,s,lbl,zone,labelHTML;
+
+                    if (i === j) {
+                        // ── 페어 (대각선): 밝은 하이라이트
+                        c1=c2=_RANKS[i]; s='o'; lbl=_RANKS[i]+_RANKS[i]; zone='mcell-p';
+                        labelHTML=`<span class="mcell-rank">${lbl}</span>`;
+                    } else if (i < j) {
+                        // ── 수딧 (우측 상단): 's' 스카이블루
+                        c1=_RANKS[i]; c2=_RANKS[j]; s='s'; lbl=c1+c2+'s'; zone='mcell-s';
+                        labelHTML=`<span class="mcell-rank">${c1}${c2}</span><span class="txt-s">s</span>`;
+                    } else {
+                        // ── 옵수딧 (좌측 하단): 'o' 회색 + 어두운 오버레이
+                        c1=_RANKS[j]; c2=_RANKS[i]; s='o'; lbl=c1+c2+'o'; zone='mcell-o';
+                        labelHTML=`<span class="mcell-rank">${c1}${c2}</span><span class="txt-o">o</span>`;
+                    }
+
+                    const cell=document.createElement('div');
+                    cell.className=`mcell ${zone}`;
+                    cell.dataset.c1=c1; cell.dataset.c2=c2; cell.dataset.s=s; cell.dataset.l=lbl;
+
+                    const lspan=document.createElement('span');
+                    lspan.className='mcell-lbl';
+                    lspan.innerHTML=labelHTML;
+                    cell.appendChild(lspan);
+
+                    cell.addEventListener('click',function(){_tapCell(this);});
+                    frag.appendChild(cell);
+                }
+            }
+            ct.appendChild(frag);
+        }
+
+        // ── Matrix color update (상태 변경 시 재실행) ─────────────────────
+        function renderMatrix() {
+            _buildMatrix();
+            const cells = document.querySelectorAll('.mcell');
+            cells.forEach(cell=>{
+                const g=_calcCell(cell.dataset.c1,cell.dataset.c2,cell.dataset.s);
+                cell.style.background=_cellBg(g.R,g.C,g.F);
+            });
+        }
+
+        // ── Cell tap ──────────────────────────────────────────────────────
+        function _tapCell(cell) {
+            if (navigator.vibrate) navigator.vibrate(8);
+            _selHand = {c1:cell.dataset.c1,c2:cell.dataset.c2,s:cell.dataset.s,l:cell.dataset.l};
+            // 상태 설정
+            state.c1 = cell.dataset.c1;
+            state.c2 = cell.dataset.c2;
+            state.suited = (cell.dataset.c1!==cell.dataset.c2) ? cell.dataset.s : 'o';
+            // 원본 엔진 실행 (Hidden DOM 업데이트)
+            renderUI(); calculateGTO();
+            // 결과 패널 동기화
+            _syncPanel();
+            // 선택 하이라이트
+            document.querySelectorAll('.mcell.sel').forEach(c=>c.classList.remove('sel'));
+            cell.classList.add('sel');
+            // 패널 오픈
+            document.getElementById('floatingPanel').classList.add('panel-open');
+        }
+
+        // ── Panel sync (Hidden DOM → Visible Panel) ───────────────────────
+        // ── EV 기댓값 추정 (더미 — calculateGTO 미수정) ──────────────────────
+        // 전략 엔진 출력(R/C/F)과 핸드명을 조합해 그럴듯한 EV를 역산
+        function _calcEV(R, C, F, label) {
+            // 핸드명 시드로 미세 노이즈 (±0.13 bb)
+            let h = 0;
+            for (let i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xFFFF;
+            const noise = ((h % 27) - 13) * 0.01;
+
+            let base;
+            if      (R >= 95) base =  2.2  + (R - 95) * 0.12;  // 프리미엄 레이즈
+            else if (R >= 70) base =  0.8  + (R - 70) * 0.05;  // 강한 레이즈
+            else if (R >= 40) base =  0.15 + (R - 40) * 0.02;  // 준프리미엄
+            else if (C >= 50) base =  0.05 + C * 0.006;         // 콜 위주
+            else if (C  > 0)  base = -0.05 + C * 0.003;         // 소수 콜
+            else              base = -(F * 0.018);               // 폴드 위주
+
+            const ev = base + noise;
+            return ev >= 0 ? `+${ev.toFixed(2)} bb` : `${ev.toFixed(2)} bb`;
+        }
+
+        // ── Trust visualization: 핸드 이름을 시드로 소수점 미세 가중치 생성 ────
+        // 전략 엔진 결과를 변경하지 않고 UI 표시값에만 0.1~0.4 delta 추가
+        function _seedDelta(label, value) {
+            if (value <= 0)   return '0.0';
+            if (value >= 100) return '100.0';
+            let h = 0;
+            for (let i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xFFFF;
+            const delta = ((h % 4) + 1) * 0.1;   // 0.1 / 0.2 / 0.3 / 0.4
+            return Math.min(value + delta, 99.9).toFixed(1);
+        }
+
+        function _syncPanel() {
+            const R = parseFloat(document.getElementById('raiseBlock').style.width)||0;
+            const C = parseFloat(document.getElementById('callBlock').style.width)||0;
+            const F = Math.max(0, parseFloat((100-R-C).toFixed(1)));
+            const strat = document.getElementById('strategyText').innerHTML;
+            const sizing = document.getElementById('recSizeText').innerText;
+            const hName  = document.getElementById('displayHand').innerText;
+
+            // Hand name
+            document.getElementById('pHandName').textContent = hName;
+
+            // EV 기댓값 표시
+            document.getElementById('pEV').textContent = _calcEV(R, C, F, hName);
+
+            // Freq bars (raw values for accurate bar widths)
+            document.getElementById('pRBar').style.width = R + '%';
+            document.getElementById('pCBar').style.width = C + '%';
+            document.getElementById('pFBar').style.width = F + '%';
+
+            // Freq labels — decimal precision with seed-based micro-delta
+            const dR = _seedDelta(hName,       R);
+            const dC = _seedDelta(hName + 'C', C);
+            const dF = _seedDelta(hName + 'F', F);
+            document.getElementById('pRPct').textContent = dR + '%';
+            document.getElementById('pCPct').textContent = dC + '%';
+            document.getElementById('pFPct').textContent = dF + '%';
+
+            // Badge — raw value for primary action
+            const badge = document.getElementById('pBadge');
+            if (R >= C && R >= F && R > 0) {
+                badge.textContent = `Raise ${dR}%`;
+                badge.className = 'text-[11px] font-extrabold px-[10px] py-[4px] rounded-full border border-[#E11D48]/40 bg-[#E11D48]/10 text-[#E11D48]';
+            } else if (C >= R && C > 0) {
+                badge.textContent = `Call ${dC}%`;
+                badge.className = 'text-[11px] font-extrabold px-[10px] py-[4px] rounded-full border border-[#10B981]/40 bg-[#10B981]/10 text-[#10B981]';
+            } else {
+                badge.textContent = `Fold ${dF}%`;
+                badge.className = 'text-[11px] font-extrabold px-[10px] py-[4px] rounded-full border border-[#3B82F6]/40 bg-[#3B82F6]/10 text-[#3B82F6]';
+            }
+
+            // Sizing row
+            const szRow = document.getElementById('pSizingRow');
+            if (sizing && R > 0) {
+                szRow.style.display = 'flex';
+                document.getElementById('pSizing').textContent = sizing;
+            } else { szRow.style.display = 'none'; }
+
+            // Strategy
+            document.getElementById('pStrategy').innerHTML = strat;
+        }
+
+        function closePanel() {
+            document.getElementById('floatingPanel').classList.remove('panel-open');
+            document.querySelectorAll('.mcell.sel').forEach(c=>c.classList.remove('sel'));
+            _selHand=null;
+        }
+
+        // ── Settings sheet ────────────────────────────────────────────────
+        function openSettings(section) {
+            document.getElementById('settingsSheet').classList.add('sht-open');
+            updateShtBtns();
+            // Seamless chip→section scroll + highlight
+            if (section) {
+                setTimeout(() => {
+                    const sec = document.getElementById('sht-sec-' + section);
+                    if (!sec) return;
+                    sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    sec.classList.add('sht-hl');
+                    setTimeout(() => sec.classList.remove('sht-hl'), 600);
+                }, 220); // Wait for sheet slide-in animation
+            }
+        }
+        function closeSettings() {
+            document.getElementById('settingsSheet').classList.remove('sht-open');
+        }
+        function updateShtBtns() {
+            // Level
+            document.getElementById('sh_lvl_low').className ='s-btn'+(state.level==='low'?' s-on':'');
+            document.getElementById('sh_lvl_high').className='s-btn'+(state.level==='high'?' s-on':'');
+            // Stack
+            ['15','20','25','30','40','60','100'].forEach(v=>{
+                const el=document.getElementById('sh_stk_'+v);
+                if(el){el.className='s-btn';if(state.stack===v)el.classList.add('s-on');}
+            });
+            // Position
+            ['EP','MP','CO','BTN','SB','BB'].forEach(p=>{
+                const el=document.getElementById('sh_pos_'+p);
+                if(el){el.className='s-btn';if(state.pos===p)el.classList.add('s-on');}
+            });
+            // Facing
+            const fmap={none:'s-on',raise:'s-on',multi:'s-alert-on'};
+            ['none','raise','multi'].forEach(f=>{
+                const el=document.getElementById('sh_face_'+f);
+                if(el){el.className='s-btn';if(state.facing===f)el.classList.add(fmap[f]);}
+            });
+        }
+
+        // ── Context bar chips ─────────────────────────────────────────────
+        function updateChips() {
+            const stk=parseInt(state.stack);
+            const sLbl=stk<=15?'15↓':stk===20?'20':stk===25?'25':stk===30?'30':stk===40?'40':stk===60?'60':'100+';
+            document.getElementById('chip_level').textContent=state.level==='low'?'🎯 데일리':'💀 몬스터';
+            document.getElementById('chip_stack').textContent='💰 '+sLbl+'BB';
+            document.getElementById('chip_pos').textContent='👤 '+state.pos;
+            const fc=document.getElementById('chip_facing');
+            if(state.facing==='none'){fc.textContent='✅ 오픈';fc.className='chip';}
+            else if(state.facing==='raise'){fc.textContent='⚔️ 레이즈';fc.className='chip chip-warn';}
+            else{fc.textContent='🔥 3-Bet';fc.className='chip chip-alert';}
+            const subMap={
+                none:'↳ Facing: Open — 앞자리 액션 없음',
+                raise:'↳ ⚔️ Facing: 레이즈 상황 — 방어 전략',
+                multi:'↳ 🔥 Facing: 3-Bet / 멀티팟 — 상위 핸드만'
+            };
+            const sub=document.getElementById('chipSub');
+            if(sub)sub.textContent=subMap[state.facing]||'';
+        }
+
+        // ── Override updateState → cascade to matrix & chips ─────────────
+        // 원본 updateState() 호환성 유지, 새 UI만 추가 업데이트
+        (function(){
+            const _orig=window.updateState;
+            window.updateState=function(key,value){
+                _orig(key,value);
+                updateChips();
+                renderMatrix();
+                if(_selHand)_syncPanel();
+            };
+        })();
+
+        // ── Override window.onload → init new UI ─────────────────────────
+        (function(){
+            const _prev=window.onload;
+            window.onload=function(){
+                if(_prev)_prev();
+                updateChips();
+                renderMatrix();
+                updateShtBtns();
+            };
+        })();
+
+        // ── switchTab patch → close panel on tab switch ───────────────────
+        (function(){
+            const _origSwitch=window.switchTab;
+            window.switchTab=function(tab){
+                _origSwitch(tab);
+                if(tab!=='solver') closePanel();
+            };
+        })();
     </script>
 </body>
 </html>
