@@ -286,8 +286,11 @@
     <!-- Header -->
     <header style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px 10px;">
         <div>
-            <div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px;">Hold'em Square</div>
-            <div style="font-size:21px;font-weight:900;color:var(--t1);line-height:1;letter-spacing:-.3px;">PRO <span style="color:var(--raise);">GTO</span></div>
+            <div style="font-size:9px;color:var(--t3);font-weight:800;letter-spacing:.25em;text-transform:uppercase;margin-bottom:2px;">PRECISION PREFLOP ENGINE</div>
+            <div style="font-size:24px;font-weight:900;color:var(--t1);line-height:1;letter-spacing:-1px;">
+                <span style="letter-spacing:-1.5px;">KJ</span><span style="font-family:'SF Mono', monospace; color:var(--call); font-weight:900; letter-spacing:-0.5px;">GRID</span> 
+                <span style="font-size:8px; font-weight:900; background:rgba(16,185,129,0.15); color:var(--call); padding:2px 6px; border-radius:4px; vertical-align:middle; margin-left:6px; letter-spacing:0.05em; border:1px solid rgba(16,185,129,0.3);">PRO</span>
+            </div>
         </div>
         <button onclick="openSettings()" style="width:38px;height:38px;background:var(--s2);border:1px solid var(--bdr);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;" onmousedown="this.style.filter='brightness(.7)'" onmouseup="this.style.filter=''">⚙️</button>
     </header>
@@ -516,7 +519,8 @@
                 else {
                     if (['AK'].includes(core)) group = "AKo";
                     else if (['AQ'].includes(core)) group = "AQo";
-                    else if (['AJ','KQ'].includes(core)) group = "STRONG_OFFSUIT";
+                    else if (['AJ'].includes(core)) group = "STRONG_OFFSUIT";
+                    else if (core === 'KQ') group = "KQo";
                     else if (['AT','KJ','KT','QJ','QT','JT'].includes(core)) group = "BROAD_OFFSUIT";
                 }
 
@@ -556,6 +560,7 @@
                         'BROAD_SUITED_MARGINAL': [0, 15, 35, 65, 80, 0],
                         'AKo': [100, 100, 100, 100, 100, 100],
                         'AQo': [100, 100, 100, 100, 100, 100],
+                        'KQo': [15, 60, 100, 100, 100, 60],
                         'STRONG_OFFSUIT': [20, 40, 65, 85, 100, 40],
                         'BROAD_OFFSUIT': [0, 10, 40, 65, 85, 0],
                         'TRASH': [0, 0, 0, 0, 0, 0]
@@ -597,7 +602,7 @@
                         const rejamMatrix = {
                             'PREM_PAIR': 100, 'HIGH_PAIR': posIdx >= 4 ? 100 : 40, 'MID_PAIR': posIdx >= 4 ? 60 : 0, 'LOW_PAIR': 0,
                             'PREM_SUITED': 100, 'STRONG_SUITED': posIdx >= 4 ? 80 : 0, 'AX_SUITED': 0, 'SUITED_CONN': 0, 'BROAD_SUITED_MARGINAL': 0,
-                            'AKo': 100, 'AQo': isTough ? 0 : 70, 'STRONG_OFFSUIT': 0, 'BROAD_OFFSUIT': 0, 'TRASH': 0
+                            'AKo': 100, 'AQo': isTough ? 0 : 70, 'KQo': isTough ? 0 : 50, 'STRONG_OFFSUIT': 0, 'BROAD_OFFSUIT': 0, 'TRASH': 0
                         };
                         let rjFreq = rejamMatrix[group] || 0;
                         if (rjFreq > 50) { setFreq(100, 0); strategy = "[리잼 푸시] 오픈 레이저를 상대로 에퀴티 실현을 위해 올인(Reshove) 맞불을 놓습니다."; }
@@ -607,12 +612,12 @@
                         const defRaiseMatrix = {
                             'PREM_PAIR': [85,85,85,85,100,100], 'HIGH_PAIR': [35,40,45,45,75,65], 'MID_PAIR': [0,0,0,0,0,10], 'LOW_PAIR': [0,0,0,0,0,0],
                             'PREM_SUITED': [45,50,55,60,85,75], 'STRONG_SUITED': [5,10,15,20,35,25], 'AX_SUITED': [0,5,10,15,20,10], 'SUITED_CONN': [0,5,10,15,25,15], 'BROAD_SUITED_MARGINAL': [0,0,0,5,10,5],
-                            'AKo': [85,85,80,75,90,85], 'AQo': [0,0,25,30,45,40], 'STRONG_OFFSUIT': [0,0,0,10,15,5], 'BROAD_OFFSUIT': [0,0,0,0,5,0], 'TRASH': [0,0,0,0,0,0]
+                            'AKo': [85,85,80,75,90,85], 'AQo': [0,0,25,30,45,40], 'KQo': [0,0,15,30,45,20], 'STRONG_OFFSUIT': [0,0,0,10,15,5], 'BROAD_OFFSUIT': [0,0,0,0,5,0], 'TRASH': [0,0,0,0,0,0]
                         };
                         const defCallMatrix = {
                             'PREM_PAIR': [15,15,15,15,0,0], 'HIGH_PAIR': [65,60,55,55,25,35], 'MID_PAIR': [45,50,55,60,30,50], 'LOW_PAIR': [20,25,35,45,10,40],
                             'PREM_SUITED': [55,50,45,40,15,25], 'STRONG_SUITED': [45,50,60,70,55,75], 'AX_SUITED': [15,20,30,40,20,60], 'SUITED_CONN': [15,20,35,50,25,65], 'BROAD_SUITED_MARGINAL': [0,5,15,25,10,45],
-                            'AKo': [15,15,20,25,10,15], 'AQo': [0,0,25,35,0,20], 'STRONG_OFFSUIT': [0,0,0,15,0,30], 'BROAD_OFFSUIT': [0,0,0,0,0,15], 'TRASH': [0,0,0,0,0,0]
+                            'AKo': [15,15,20,25,10,15], 'AQo': [0,0,25,35,0,20], 'KQo': [0,10,30,45,10,40], 'STRONG_OFFSUIT': [0,0,0,15,0,30], 'BROAD_OFFSUIT': [0,0,0,0,0,15], 'TRASH': [0,0,0,0,0,0]
                         };
                         
                         let rFreq = (defRaiseMatrix[group] && defRaiseMatrix[group][posIdx]) ? defRaiseMatrix[group][posIdx] : 0;
@@ -641,6 +646,7 @@
                             else if (state.pos === 'SB') strategy = "AKo SB. OOP 취약성 + 스퀴즈 노출을 방어하기 위해 90% 3-Bet이 주력입니다. 콜은 최소한으로 섞습니다. 폴드는 없습니다.";
                             else strategy = "AKo. 3-Bet으로 밸류를 극대화하고, 15% 콜로 트래핑 레인지를 구성합니다. 어떤 포지션에서도 단일 레이즈에 폴드는 없습니다.";
                         }
+                        else if (group === 'KQo') strategy = isIP ? "KQo 인포지션. CO/BTN에서 콜과 3-Bet을 유연하게 믹싱합니다. 도미네이션 위험을 항상 고려하세요." : "KQo 아웃포지션. EP/MP에서는 타이트하게 폴드, SB/BB에서만 방어를 고려합니다.";
                         else if (group === 'AQo') strategy = (isIP) ? "AQo 인포지션. 타이트한 3-Bet과 제한적인 콜 믹싱." : (isBlinds ? "AQo 블라인드 방어. 역도미네잇 방지를 위해 콜은 배제하고 3-Bet으로 돌립니다." : "얼리 포지션에서 레이즈를 맞은 AQo는 무조건 폴드입니다.");
                         else if (group.includes('PREM')) strategy = "프리미엄 레인지입니다. 포지션 이점과 블라인드 여부에 따라 3-Bet 밸류와 트랩 콜이 분배됩니다.";
                         else if (group.includes('SUITED')) strategy = "수티드 라인 방어. 스택이 깊고 뒷자리일수록 팟 오즈 콜 빈도가 극적으로 상승합니다.";
@@ -655,8 +661,8 @@
                         if (['PREM_PAIR', 'PREM_SUITED'].includes(group) || core === 'AK') { setFreq(100, 0); strategy = "[멀티팟 숏스택 리잼] 강력한 에퀴티를 바탕으로 남은 스택을 전부 밀어 넣습니다."; }
                         else { setFreq(0, 0); strategy = "멀티웨이 스퀴즈 팟에 어설픈 패로 칩을 넣으면 안됩니다."; }
                     } else {
-                        const multiRaiseMatrix = { 'PREM_PAIR': 100, 'HIGH_PAIR': 35, 'MID_PAIR': 0, 'PREM_SUITED': 40, 'STRONG_SUITED': 0, 'AKo': isIP ? 35 : 55, 'AQo': 0, 'TRASH': 0 };
-                        const multiCallMatrix = { 'PREM_PAIR': 0, 'HIGH_PAIR': 55, 'MID_PAIR': 0, 'PREM_SUITED': 40, 'STRONG_SUITED': 0, 'AKo': isIP ? 45 : 0, 'AQo': isIP ? 15 : 0, 'TRASH': 0 };
+                        const multiRaiseMatrix = { 'PREM_PAIR': 100, 'HIGH_PAIR': 35, 'MID_PAIR': 0, 'PREM_SUITED': 40, 'STRONG_SUITED': 0, 'AKo': isIP ? 35 : 55, 'AQo': 0, 'KQo': 0, 'TRASH': 0 };
+                        const multiCallMatrix = { 'PREM_PAIR': 0, 'HIGH_PAIR': 55, 'MID_PAIR': 0, 'PREM_SUITED': 40, 'STRONG_SUITED': 0, 'AKo': isIP ? 45 : 0, 'AQo': isIP ? 15 : 0, 'KQo': 0, 'TRASH': 0 };
                         
                         let rFreq = multiRaiseMatrix[group] || 0;
                         let cFreq = multiCallMatrix[group] || 0;
@@ -960,7 +966,8 @@
             }else{
                 if(core==='AK')grp="AKo";
                 else if(core==='AQ')grp="AQo";
-                else if(['AJ','KQ'].includes(core))grp="STRONG_OFFSUIT";
+                else if(core==='AJ')grp="STRONG_OFFSUIT";
+                else if(core==='KQ')grp="KQo";
                 else if(['AT','KJ','KT','QJ','QT','JT'].includes(core))grp="BROAD_OFFSUIT";
             }
             const pl=['EP','MP','CO','BTN','SB','BB'];
@@ -976,7 +983,7 @@
                 R=parseFloat(R.toFixed(1));C=parseFloat(C.toFixed(1));F=parseFloat(F.toFixed(1));
             };
             if(state.facing==='none'){
-                const M={'PREM_PAIR':[100,100,100,100,100,100],'HIGH_PAIR':[100,100,100,100,100,100],'MID_PAIR':[100,100,100,100,100,80],'LOW_PAIR':[15,30,60,85,100,0],'PREM_SUITED':[100,100,100,100,100,100],'STRONG_SUITED':[100,100,100,100,100,80],'AX_SUITED':[20,30,50,75,100,30],'SUITED_CONN':[15,25,45,75,100,0],'BROAD_SUITED_MARGINAL':[0,15,35,65,80,0],'AKo':[100,100,100,100,100,100],'AQo':[100,100,100,100,100,100],'STRONG_OFFSUIT':[20,40,65,85,100,40],'BROAD_OFFSUIT':[0,10,40,65,85,0],'TRASH':[0,0,0,0,0,0]};
+                const M={'PREM_PAIR':[100,100,100,100,100,100],'HIGH_PAIR':[100,100,100,100,100,100],'MID_PAIR':[100,100,100,100,100,80],'LOW_PAIR':[15,30,60,85,100,0],'PREM_SUITED':[100,100,100,100,100,100],'STRONG_SUITED':[100,100,100,100,100,80],'AX_SUITED':[20,30,50,75,100,30],'SUITED_CONN':[15,25,45,75,100,0],'BROAD_SUITED_MARGINAL':[0,15,35,65,80,0],'AKo':[100,100,100,100,100,100],'AQo':[100,100,100,100,100,100],'KQo':[15,60,100,100,100,60],'STRONG_OFFSUIT':[20,40,65,85,100,40],'BROAD_OFFSUIT':[0,10,40,65,85,0],'TRASH':[0,0,0,0,0,0]};
                 let br=(M[grp]||[0])[pi]||0;
                 if(ef<=25){
                     if(state.pos==='BB'){br>0?sf(100,0):sf(0,100);}
@@ -988,11 +995,11 @@
                 }
             }else if(state.facing==='raise'){
                 if(ef<=25){
-                    const rj={'PREM_PAIR':100,'HIGH_PAIR':pi>=4?100:40,'MID_PAIR':pi>=4?60:0,'LOW_PAIR':0,'PREM_SUITED':100,'STRONG_SUITED':pi>=4?80:0,'AX_SUITED':0,'SUITED_CONN':0,'BROAD_SUITED_MARGINAL':0,'AKo':100,'AQo':tgh?0:70,'STRONG_OFFSUIT':0,'BROAD_OFFSUIT':0,'TRASH':0};
+                    const rj={'PREM_PAIR':100,'HIGH_PAIR':pi>=4?100:40,'MID_PAIR':pi>=4?60:0,'LOW_PAIR':0,'PREM_SUITED':100,'STRONG_SUITED':pi>=4?80:0,'AX_SUITED':0,'SUITED_CONN':0,'BROAD_SUITED_MARGINAL':0,'AKo':100,'AQo':tgh?0:70,'KQo':tgh?0:50,'STRONG_OFFSUIT':0,'BROAD_OFFSUIT':0,'TRASH':0};
                     (rj[grp]||0)>50?sf(100,0):sf(0,0);
                 }else{
-                    const dR={'PREM_PAIR':[85,85,85,85,100,100],'HIGH_PAIR':[35,40,45,45,75,65],'MID_PAIR':[0,0,0,0,0,10],'LOW_PAIR':[0,0,0,0,0,0],'PREM_SUITED':[45,50,55,60,85,75],'STRONG_SUITED':[5,10,15,20,35,25],'AX_SUITED':[0,5,10,15,20,10],'SUITED_CONN':[0,5,10,15,25,15],'BROAD_SUITED_MARGINAL':[0,0,0,5,10,5],'AKo':[85,85,80,75,90,85],'AQo':[0,0,25,30,45,40],'STRONG_OFFSUIT':[0,0,0,10,15,5],'BROAD_OFFSUIT':[0,0,0,0,5,0],'TRASH':[0,0,0,0,0,0]};
-                    const dC={'PREM_PAIR':[15,15,15,15,0,0],'HIGH_PAIR':[65,60,55,55,25,35],'MID_PAIR':[45,50,55,60,30,50],'LOW_PAIR':[20,25,35,45,10,40],'PREM_SUITED':[55,50,45,40,15,25],'STRONG_SUITED':[45,50,60,70,55,75],'AX_SUITED':[15,20,30,40,20,60],'SUITED_CONN':[15,20,35,50,25,65],'BROAD_SUITED_MARGINAL':[0,5,15,25,10,45],'AKo':[15,15,20,25,10,15],'AQo':[0,0,25,35,0,20],'STRONG_OFFSUIT':[0,0,0,15,0,30],'BROAD_OFFSUIT':[0,0,0,0,0,15],'TRASH':[0,0,0,0,0,0]};
+                    const dR={'PREM_PAIR':[85,85,85,85,100,100],'HIGH_PAIR':[35,40,45,45,75,65],'MID_PAIR':[0,0,0,0,0,10],'LOW_PAIR':[0,0,0,0,0,0],'PREM_SUITED':[45,50,55,60,85,75],'STRONG_SUITED':[5,10,15,20,35,25],'AX_SUITED':[0,5,10,15,20,10],'SUITED_CONN':[0,5,10,15,25,15],'BROAD_SUITED_MARGINAL':[0,0,0,5,10,5],'AKo':[85,85,80,75,90,85],'AQo':[0,0,25,30,45,40],'KQo':[0,0,15,30,45,20],'STRONG_OFFSUIT':[0,0,0,10,15,5],'BROAD_OFFSUIT':[0,0,0,0,5,0],'TRASH':[0,0,0,0,0,0]};
+                    const dC={'PREM_PAIR':[15,15,15,15,0,0],'HIGH_PAIR':[65,60,55,55,25,35],'MID_PAIR':[45,50,55,60,30,50],'LOW_PAIR':[20,25,35,45,10,40],'PREM_SUITED':[55,50,45,40,15,25],'STRONG_SUITED':[45,50,60,70,55,75],'AX_SUITED':[15,20,30,40,20,60],'SUITED_CONN':[15,20,35,50,25,65],'BROAD_SUITED_MARGINAL':[0,5,15,25,10,45],'AKo':[15,15,20,25,10,15],'AQo':[0,0,25,35,0,20],'KQo':[0,10,30,45,10,40],'STRONG_OFFSUIT':[0,0,0,15,0,30],'BROAD_OFFSUIT':[0,0,0,0,0,15],'TRASH':[0,0,0,0,0,0]};
                     let rF=(dR[grp]||[])[pi]||0,cF=(dC[grp]||[])[pi]||0;
                     if(tgh){const im=['PREM_PAIR','PREM_SUITED','AKo','HIGH_PAIR'].includes(grp),lt=['AQo'].includes(grp);if(!im){rF*=lt?.9:.8;cF*=lt?.75:.6;}}
                     if(ef<30)cF*=.3;else if(ef<40)cF*=.55;else if(ef<60)cF*=.75;
@@ -1001,8 +1008,8 @@
             }else{
                 if(ef<=30){(['PREM_PAIR','PREM_SUITED'].includes(grp)||core==='AK')?sf(100,0):sf(0,0);}
                 else{
-                    const mr={'PREM_PAIR':100,'HIGH_PAIR':35,'MID_PAIR':0,'PREM_SUITED':40,'STRONG_SUITED':0,'AKo':ip?35:55,'AQo':0,'TRASH':0};
-                    const mc={'PREM_PAIR':0,'HIGH_PAIR':55,'MID_PAIR':0,'PREM_SUITED':40,'STRONG_SUITED':0,'AKo':ip?45:0,'AQo':ip?15:0,'TRASH':0};
+                    const mr={'PREM_PAIR':100,'HIGH_PAIR':35,'MID_PAIR':0,'PREM_SUITED':40,'STRONG_SUITED':0,'AKo':ip?35:55,'AQo':0,'KQo':0,'TRASH':0};
+                    const mc={'PREM_PAIR':0,'HIGH_PAIR':55,'MID_PAIR':0,'PREM_SUITED':40,'STRONG_SUITED':0,'AKo':ip?45:0,'AQo':ip?15:0,'KQo':0,'TRASH':0};
                     let rF=mr[grp]||0,cF=mc[grp]||0;
                     if(tgh)cF*=.4;
                     sf(rF,cF);
