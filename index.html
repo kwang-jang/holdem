@@ -58,8 +58,9 @@
         #settingsSheet{position:fixed;inset:0;z-index:50;opacity:0;pointer-events:none;transition:opacity .25s ease;}
         #settingsSheet.sht-open{opacity:1;pointer-events:all;}
         #sht-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.72);}
-        #sht-panel{position:absolute;bottom:0;left:0;right:0;max-width:448px;margin:0 auto;background:#13161A;border-top:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:0 16px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:82vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px);}
+        #sht-panel{position:absolute;bottom:0;left:0;right:0;max-width:448px;margin:0 auto;background:#13161A;border-top:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:0 16px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1), max-height .32s cubic-bezier(.32,.72,0,1), height .32s cubic-bezier(.32,.72,0,1);max-height:82vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px);}
         #settingsSheet.sht-open #sht-panel{transform:translateY(0);}
+        .sht-full{max-height:92vh !important;height:92vh;}
 
         /* Settings button states — toggled by updateShtBtns() */
         .s-btn{background:#1C2026;color:#9CA3AF;border-color:rgba(255,255,255,.08);}
@@ -70,24 +71,15 @@
         @keyframes sht-flash{0%,100%{background:transparent}40%{background:rgba(16,185,129,.16);border-radius:10px;}}
         .sht-hl{animation:sht-flash .55s ease;}
 
-        /* Card flip 3D engine — 절대 수정 금지 */
-        .card-scene{perspective:800px;}
-        .card-wrap{width:100%;height:100%;position:relative;transition:transform .5s cubic-bezier(.175,.885,.32,1.275);transform-style:preserve-3d;}
-        .is-flipped{transform:rotateY(180deg);}
-        .card-face{width:100%;height:100%;position:absolute;backface-visibility:hidden;border-radius:6px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,.5);overflow:hidden;}
-        .card-face-front{background:#fff;transform:rotateY(180deg);border:1px solid #d1d5db;transition:border-color .3s,box-shadow .3s,filter .3s;}
-        .card-face-back{background:#1e3a8a;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0px,rgba(255,255,255,.05) 2px,transparent 2px,transparent 6px);border:2px solid #fff;}
-        .win-glow{border:2px solid #eab308!important;box-shadow:0 0 12px rgba(234,179,8,.7)!important;z-index:10;}
-        .win-pop{transform:rotateY(180deg) scale(1.08)!important;z-index:20;}
-        .card-dimmed{filter:brightness(.55) grayscale(40%);}
+        /* mono util */
+        .mono { font-family:'SF Mono','Fira Code',ui-monospace,monospace; }
 
-        /* ── Settings sheet (Phase 1 quality restore) ────────────────────
-           CSS variables & component classes for premium bottom sheet UI   */
+        /* ── Settings sheet ─────────────────────────────────────────── */
         :root {
             --s1:  #13161A; --s2:  #1C2026;
             --bdr: rgba(255,255,255,0.08);
             --t1:  #F9FAFB; --t2:  #9CA3AF; --t3:  #6B7280;
-            --call:#10B981;
+            --raise:#E11D48; --call:#10B981;
         }
         .s-sec { padding:14px 0; border-bottom:1px solid var(--bdr); }
         .s-sec:last-of-type { border-bottom:none; }
@@ -109,8 +101,6 @@
             transition:filter .15s;margin:16px 0 4px;
         }
         .s-apply-btn:active { filter:brightness(.85); }
-        /* mono util */
-        .mono { font-family:'SF Mono','Fira Code',ui-monospace,monospace; }
     </style>
 </head>
 <body>
@@ -121,7 +111,7 @@
     <div id="sht-backdrop" onclick="closeSettings()"></div>
     <div id="sht-panel">
         <!-- Handle -->
-        <div style="display:flex;justify-content:center;padding:12px 0 6px;">
+        <div id="sht-handle-area" style="display:flex;justify-content:center;padding:12px 0 6px;cursor:grab;touch-action:none;">
             <div style="width:36px;height:4px;background:#374151;border-radius:99px;"></div>
         </div>
         <!-- Header -->
@@ -197,19 +187,19 @@
 
         <!-- ④ Facing — id="sht-sec-facing" -->
         <div id="sht-sec-facing" class="s-sec">
-            <span class="s-lbl">앞자리 액션</span>
+            <span class="s-lbl">테이블 상황</span>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
                 <button id="sh_face_none"  class="s-btn s-on" onclick="updateState('facing','none');updateShtBtns();">
-                    <span style="font-size:17px;">✅</span><span>오픈</span>
-                    <span style="font-size:9px;opacity:.5;font-weight:400;">Open</span>
+                    <span style="font-size:17px;">✅</span><span>언오픈 팟</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">Unopened</span>
                 </button>
                 <button id="sh_face_raise" class="s-btn" onclick="updateState('facing','raise');updateShtBtns();">
-                    <span style="font-size:17px;">⚔️</span><span>레이즈</span>
-                    <span style="font-size:9px;opacity:.5;font-weight:400;">1 Raise</span>
+                    <span style="font-size:17px;">⚔️</span><span>레이즈 나옴</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">방어 (vs Raise)</span>
                 </button>
                 <button id="sh_face_multi" class="s-btn" onclick="updateState('facing','multi');updateShtBtns();">
-                    <span style="font-size:17px;">🔥</span><span>3-Bet</span>
-                    <span style="font-size:9px;opacity:.5;font-weight:400;">Multi Pot</span>
+                    <span style="font-size:17px;">🔥</span><span>3-Bet 나옴</span>
+                    <span style="font-size:9px;opacity:.5;font-weight:400;">방어 (vs 3-Bet+)</span>
                 </button>
             </div>
         </div>
@@ -297,10 +287,10 @@
 
     <!-- Tab Bar -->
     <div style="display:flex;border-bottom:1px solid rgba(255,255,255,.06);padding:0 16px;flex-shrink:0;">
-        <button onclick="switchTab('solver')" id="tab_solver" class="flex-1 pb-2 tab-active transition-colors" style="font-size:12px;font-weight:700;background:none;border:none;cursor:pointer;padding-top:8px;padding-bottom:9px;">🧠 실전 가이드</button>
-        <button onclick="switchTab('game')"   id="tab_game"   class="flex-1 pb-2 tab-inactive transition-colors" style="font-size:12px;font-weight:700;background:none;border:none;cursor:pointer;padding-top:8px;padding-bottom:9px;">⚔️ 핸드 모의전</button>
-        <button style="flex:1;padding:8px 0 9px;font-size:10px;font-weight:700;color:#374151;background:none;border:none;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;gap:1px;">
-            <span>👑 프리미엄</span><span style="font-size:8px;font-weight:400;">예정</span>
+        <button id="tab_solver" class="flex-1 pb-2 tab-active transition-colors" style="font-size:12px;font-weight:700;background:none;border:none;cursor:pointer;padding-top:8px;padding-bottom:9px;">🧠 프리플랍 엔진</button>
+        <button disabled style="flex:1;padding:8px 0 9px;background:none;border:none;cursor:not-allowed;display:flex;align-items:center;justify-content:center;gap:5px;opacity:.45;">
+            <span style="font-size:12px;font-weight:700;color:#6B7280;">📝 GTO 트레이닝</span>
+            <span style="font-size:8px;font-weight:700;color:#10B981;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);padding:1px 5px;border-radius:4px;letter-spacing:.04em;">준비중</span>
         </button>
     </div>
 
@@ -347,60 +337,10 @@
 
     </div>
 
-    <!-- ============================================== -->
-    <!-- 2. 핸드 모의전 탭 -->
-    <!-- ============================================== -->
-    <div id="gameTab" class="hidden flex-1 flex-col pb-4">
-        <div class="flex justify-between items-center bg-[#1a1d24] p-4 rounded-xl border border-gray-800 shadow-lg mb-4">
-            <div class="flex flex-col">
-                <span class="text-xs text-gray-400 font-bold uppercase tracking-widest">현재 연승</span>
-                <span id="streakCount" class="text-3xl font-black text-amber-400 drop-shadow-md">0</span>
-            </div>
-            <div class="text-right flex flex-col items-end">
-                <span class="text-[10px] bg-red-600/20 text-red-400 px-2 py-1 rounded-md font-bold uppercase tracking-widest border border-red-500/30">최고 기록: <span id="bestStreak">0</span></span>
-                <span id="stageText" class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest animate-pulse">대기중...</span>
-            </div>
-        </div>
-
-        <div class="bg-[#1a1d24] py-6 px-4 rounded-xl border border-gray-800 shadow-xl flex flex-col items-center justify-between">
-            <div class="w-full flex flex-col items-center">
-                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Villain (빌런)</span>
-                <div class="flex gap-2" id="villainCards"></div>
-                <div id="villainRank" class="h-4 mt-1.5 text-[12px] font-extrabold text-amber-500 opacity-0 transition-opacity"></div>
-            </div>
-            <div class="w-full flex flex-col items-center my-4 bg-[#252932] p-4 rounded-lg border border-gray-700 shadow-inner">
-                <span class="text-[10px] text-green-400 font-bold uppercase tracking-widest mb-3">Community Board</span>
-                <div class="flex gap-1.5" id="boardCards"></div>
-            </div>
-            <div class="w-full flex flex-col items-center">
-                <div id="heroRank" class="h-4 mb-1.5 text-[12px] font-extrabold text-blue-400 opacity-0 transition-opacity"></div>
-                <div class="flex gap-2" id="heroCards"></div>
-                <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest mt-2">Hero (나)</span>
-            </div>
-        </div>
-        
-        <div id="bottomActionArea" class="mt-4 h-[120px] flex flex-col justify-center">
-            <button id="flipBtn" onclick="runSequence()" class="w-full bg-blue-600 text-white font-black text-xl py-4 rounded-xl shadow-[0_4px_0_0_#1e3a8a] active:shadow-none active:translate-y-1 transition-all uppercase tracking-widest">
-                카드 확인 (FLIP)
-            </button>
-            
-            <div id="gameResultPanel" class="hidden w-full h-full bg-[#252932] border border-gray-700 rounded-xl p-3 flex-col items-center justify-between shadow-xl">
-                <div class="flex items-center justify-between w-full mb-1 px-2">
-                    <h2 id="gameMsg" class="text-3xl font-black drop-shadow-md tracking-wider italic"></h2>
-                    <p id="gameSubMsg" class="text-[11px] text-gray-300 font-bold text-right leading-tight break-keep"></p>
-                </div>
-                <button id="nextGameBtn" onclick="initGame()" class="w-full text-black font-extrabold py-2.5 rounded-lg shadow-md uppercase tracking-widest text-sm transition-colors transform hover:scale-[1.02]">
-                    다음 핸드 진행
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- 스크립트 엔진 -->
 
     <!-- ╔══════════════════════════════════════════╗ -->
-    <!-- ║  LEGACY DOM — calculateGTO() 호환 유지  ║ -->
-    <!-- ║  (이 영역은 절대 삭제 금지)              ║ -->
+    <!-- ║  LEGACY DOM — calculateGTO() / _syncPanel() 호환 유지 ║ -->
     <!-- ╚══════════════════════════════════════════╝ -->
     <div id="_legacy" style="display:none!important;position:absolute;pointer-events:none;" aria-hidden="true">
         <span id="displayHand">AKs</span>
@@ -410,49 +350,34 @@
         <div id="foldBlock"  style="width:100%;"><span id="foldLabel">Fold</span><span id="foldPct">100%</span></div>
         <div id="sizingContainer" class="hidden"><span id="recSizeText"></span></div>
         <div id="strategyText"></div>
-        <div id="resultCard"></div>
-        <!-- Legacy setting buttons — renderUI() 호환 -->
-        <button id="lvl_low"   class="btn-active"   onclick="updateState('level','low')"></button>
-        <button id="lvl_high"  class="btn-inactive"  onclick="updateState('level','high')"></button>
-        <button id="stk_15"    class="btn-inactive"></button>
-        <button id="stk_20"    class="btn-inactive"></button>
-        <button id="stk_25"    class="btn-inactive"></button>
-        <button id="stk_30"    class="btn-inactive"></button>
-        <button id="stk_40"    class="btn-inactive"></button>
-        <button id="stk_60"    class="btn-inactive"></button>
-        <button id="stk_100"   class="btn-active"></button>
-        <button id="pos_EP"    class="btn-active"></button>
-        <button id="pos_MP"    class="btn-inactive"></button>
-        <button id="pos_CO"    class="btn-inactive"></button>
-        <button id="pos_BTN"   class="btn-inactive"></button>
-        <button id="pos_SB"    class="btn-inactive"></button>
-        <button id="pos_BB"    class="btn-inactive"></button>
-        <button id="face_none" class="btn-active"></button>
-        <button id="face_raise" class="btn-inactive"></button>
-        <button id="face_multi" class="btn-inactive"></button>
-        <button id="suit_s"    class="btn-active"></button>
-        <button id="suit_o"    class="btn-inactive"></button>
-        <!-- Legacy card selects — renderUI() 참조 (calculateGTO는 state 객체 직접 읽음) -->
-        <select id="card1"><option value="A" selected>A</option><option value="K">K</option></select>
-        <select id="card2"><option value="A">A</option><option value="K" selected>K</option></select>
+        <!-- suit_s/o: renderUI()의 opacity 조작 대상 (paired hand 감지용) -->
+        <button id="suit_s" class="btn-active"></button>
+        <button id="suit_o" class="btn-inactive"></button>
     </div>
 
 </div><!-- /#app 닫기 -->
 
     <script>
         function switchTab(tab) {
-            document.getElementById('tab_solver').className = tab === 'solver' ? "flex-1 pb-2 tab-active transition-colors" : "flex-1 pb-2 tab-inactive transition-colors";
-            document.getElementById('tab_game').className = tab === 'game' ? "flex-1 pb-2 tab-active transition-colors" : "flex-1 pb-2 tab-inactive transition-colors";
-            document.getElementById('solverTab').style.display = tab === 'solver' ? 'flex' : 'none';
-            document.getElementById('gameTab').style.display = tab === 'game' ? 'flex' : 'none';
-            if(tab === 'game' && !gameInitialized) { initGame(); gameInitialized = true; }
+            document.getElementById('solverTab').style.display = 'flex';
         }
+
+        // ── 전역 상수 ────────────────────────────────────────────────────────
+        const RANK_ORDER = "AKQJT98765432";
 
         const state = { level: 'low', stack: '100', pos: 'EP', facing: 'none', c1: 'A', c2: 'K', suited: 's' };
         
-        function updateState(key, value) { state[key] = value; renderUI(); calculateGTO(); }
+        function updateState(key, value) {
+            state[key] = value;
+            renderUI();
+            calculateGTO();
+            updateChips();
+            renderMatrix();
+            if (_selHand) _syncPanel();
+        }
         function setBtnActive(id, isActive, isAlert = false) {
             const el = document.getElementById(id);
+            if (!el) return;
             el.className = el.className.replace(/btn-active|btn-inactive|btn-alert/g, '').trim();
             if (isActive) el.classList.add(isAlert ? 'btn-alert' : 'btn-active'); else el.classList.add('btn-inactive');
         }
@@ -471,9 +396,8 @@
             else { document.getElementById('suit_s').style.opacity = '1'; document.getElementById('suit_o').style.opacity = '1'; }
             setBtnActive('suit_s', state.suited === 's'); setBtnActive('suit_o', state.suited === 'o');
             
-            const rankOrder = "AKQJT98765432";
             let displayC1 = state.c1, displayC2 = state.c2;
-            if (rankOrder.indexOf(displayC1) > rankOrder.indexOf(displayC2)) { let temp = displayC1; displayC1 = displayC2; displayC2 = temp; }
+            if (RANK_ORDER.indexOf(displayC1) > RANK_ORDER.indexOf(displayC2)) { let temp = displayC1; displayC1 = displayC2; displayC2 = temp; }
             document.getElementById('displayHand').innerText = (displayC1 === displayC2) ? (displayC1 + displayC2) : (displayC1 + displayC2 + state.suited);
             
             const badge = document.getElementById('stackBadge');
@@ -492,7 +416,7 @@
         // ==========================================
         function calculateGTO() {
             try {
-                const rankOrder = "AKQJT98765432";
+                const rankOrder = RANK_ORDER;
                 let r1 = state.c1, r2 = state.c2;
                 if (rankOrder.indexOf(r1) > rankOrder.indexOf(r2)) { let temp = r1; r1 = r2; r2 = temp; }
                 const core = r1 + r2;
@@ -720,208 +644,6 @@
             }
         }
 
-        // ====================================================
-        // [핸드 모의전 미니게임 엔진]
-        // ====================================================
-        let gameInitialized = false, streak = 0, maxStreak = 0;
-        let deck = [], heroH = [], villainH = [], board = [];
-        let isFlipping = false; 
-        const suits = { 's': {sym:'♠'}, 'h': {sym:'♥'}, 'd': {sym:'♦'}, 'c': {sym:'♣'} };
-        const ranks = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
-        
-        function getDeck() {
-            let d = []; for (let s in suits) for (let r of ranks) d.push(r+s);
-            for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
-            return d;
-        }
-
-        function createCardHTML(cardStr, isHidden = false, sizeClasses = "w-[56px] h-[78px] text-base") {
-            let r = cardStr[0] === 'T' ? '10' : cardStr[0];
-            let sType = cardStr[1];
-            let col = (sType === 'h' || sType === 'd') ? 'text-red-600' : 'text-[#1a1a1a]';
-            let flipClass = isHidden ? '' : 'is-flipped';
-            
-            return `
-            <div class="card-scene ${sizeClasses}">
-                <div class="card-wrap ${flipClass}">
-                    <div class="card-face card-face-back"></div>
-                    <div class="card-face card-face-front overflow-hidden">
-                        <div class="absolute top-[2px] left-[5px] flex flex-col items-center">
-                            <span class="${col} font-black leading-none tracking-tighter" style="font-size: 1.4em;">${r}</span>
-                            <span class="${col} leading-none mt-[1px]" style="font-size: 0.9em;">${suits[sType].sym}</span>
-                        </div>
-                        <div class="absolute bottom-[-8px] right-[1px] flex items-center justify-center">
-                            <span class="${col} opacity-85 leading-none" style="font-size: 3.2em;">${suits[sType].sym}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        function initGame() {
-            isFlipping = false;
-            const resPanel = document.getElementById('gameResultPanel');
-            resPanel.classList.add('hidden'); resPanel.classList.remove('flex');
-            
-            const flipBtn = document.getElementById('flipBtn');
-            flipBtn.classList.remove('hidden');
-            flipBtn.disabled = false;
-            
-            document.getElementById('stageText').innerText = "대기중...";
-            document.getElementById('heroRank').style.opacity = '0';
-            document.getElementById('villainRank').style.opacity = '0';
-            
-            deck = getDeck();
-            heroH = [deck.pop(), deck.pop()];
-            villainH = [deck.pop(), deck.pop()];
-            board = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
-
-            document.getElementById('heroCards').innerHTML = createCardHTML(heroH[0], false, 'w-[64px] h-[90px] text-lg') + createCardHTML(heroH[1], false, 'w-[64px] h-[90px] text-lg');
-            document.getElementById('villainCards').innerHTML = createCardHTML(villainH[0], true, 'w-[56px] h-[78px] text-base') + createCardHTML(villainH[1], true, 'w-[56px] h-[78px] text-base');
-            document.getElementById('boardCards').innerHTML = board.map(c => createCardHTML(c, true, 'w-[50px] h-[70px] text-sm')).join('');
-        }
-
-        function runSequence() {
-            if (isFlipping) return;
-            isFlipping = true;
-            document.getElementById('flipBtn').disabled = true;
-            document.getElementById('flipBtn').classList.add('hidden');
-            
-            const vWraps = document.getElementById('villainCards').querySelectorAll('.card-wrap');
-            const bWraps = document.getElementById('boardCards').querySelectorAll('.card-wrap');
-            const stage = document.getElementById('stageText');
-
-            setTimeout(() => { stage.innerText = "Villain Shows"; vWraps[0].classList.add('is-flipped'); vWraps[1].classList.add('is-flipped'); }, 500);
-            setTimeout(() => { stage.innerText = "Flop"; for(let i=0; i<3; i++) bWraps[i].classList.add('is-flipped'); }, 1500);
-            setTimeout(() => { stage.innerText = "Turn"; bWraps[3].classList.add('is-flipped'); }, 2500);
-            setTimeout(() => { stage.innerText = "River"; bWraps[4].classList.add('is-flipped'); }, 3500);
-            setTimeout(evaluateWinner, 4500);
-        }
-
-        function eval7(cardsStrArr) {
-            const rVals = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'T':10,'J':11,'Q':12,'K':13,'A':14};
-            const rNames = {14:'A',13:'K',12:'Q',11:'J',10:'10',9:'9',8:'8',7:'7',6:'6',5:'5',4:'4',3:'3',2:'2'};
-            const getCombos = (arr, k) => {
-                if (k === 1) return arr.map(a => [a]);
-                let res = [];
-                arr.forEach((val, i) => { getCombos(arr.slice(i + 1), k - 1).forEach(t => res.push([val, ...t])); });
-                return res;
-            };
-            
-            let bestScore = 0, bestName = "", bestCombo = [];
-            getCombos(cardsStrArr, 5).forEach(combo => {
-                let suits = combo.map(c => c[1]);
-                let rankNums = combo.map(c => rVals[c[0]]).sort((a,b)=>b-a);
-                let isFlush = suits.every(s => s === suits[0]);
-                let isStraight = (rankNums[0]-rankNums[4] === 4 && new Set(rankNums).size === 5);
-                if (rankNums.join() === "14,5,4,3,2") { isStraight = true; rankNums = [5,4,3,2,1]; }
-                
-                let counts = {}; rankNums.forEach(r => counts[r] = (counts[r]||0)+1);
-                let groups = Object.entries(counts).sort((a,b) => b[1]-a[1] || b[0]-a[0]);
-                
-                let score = 0, name = "";
-                let g0 = Number(groups[0][0]);
-                let g1 = groups.length > 1 ? Number(groups[1][0]) : 0;
-                let g2 = groups.length > 2 ? Number(groups[2][0]) : 0;
-                let g3 = groups.length > 3 ? Number(groups[3][0]) : 0;
-                let g4 = groups.length > 4 ? Number(groups[4][0]) : 0;
-
-                if (isStraight && isFlush) { score = 80000000000 + rankNums[0]; name = `${rNames[rankNums[0]]} 스티플`; }
-                else if (groups[0][1] === 4) { score = 70000000000 + g0*100 + g1; name = `${rNames[g0]} 포카드`; }
-                else if (groups[0][1] === 3 && groups[1][1] === 2) { score = 60000000000 + g0*100 + g1; name = `${rNames[g0]} 풀하우스`; }
-                else if (isFlush) { score = 50000000000 + rankNums[0]*100000000 + rankNums[1]*1000000 + rankNums[2]*10000 + rankNums[3]*100 + rankNums[4]; name = `${rNames[rankNums[0]]} 플러시`; }
-                else if (isStraight) { score = 40000000000 + rankNums[0]; name = `${rNames[rankNums[0]]} 스트레이트`; }
-                else if (groups[0][1] === 3) { score = 30000000000 + g0*10000 + g1*100 + g2; name = `${rNames[g0]} 셋(트리플)`; }
-                else if (groups[0][1] === 2 && groups[1][1] === 2) { score = 20000000000 + g0*10000 + g1*100 + g2; name = `${rNames[g0]},${rNames[g1]} 투페어`; }
-                else if (groups[0][1] === 2) { score = 10000000000 + g0*1000000 + g1*10000 + g2*100 + g3; name = `${rNames[g0]} 원페어`; }
-                else { score = rankNums[0]*100000000 + rankNums[1]*1000000 + rankNums[2]*10000 + rankNums[3]*100 + rankNums[4]; name = `${rNames[rankNums[0]]} 하이카드`; }
-                
-                if (score > bestScore) { bestScore = score; bestName = name; bestCombo = combo; }
-            });
-            return { score: bestScore, name: bestName, combo: bestCombo };
-        }
-
-        // 패배 카드 앞면(.card-face-front)에 직접 음영 처리
-        function applyHighlight(winningCombo, isHeroWin, isVillainWin) {
-            const hWraps = document.getElementById('heroCards').querySelectorAll('.card-wrap');
-            const vWraps = document.getElementById('villainCards').querySelectorAll('.card-wrap');
-            const bWraps = document.getElementById('boardCards').querySelectorAll('.card-wrap');
-
-            const allCards = [
-                { val: heroH[0], el: hWraps[0], owner: 'hero' },
-                { val: heroH[1], el: hWraps[1], owner: 'hero' },
-                { val: villainH[0], el: vWraps[0], owner: 'villain' },
-                { val: villainH[1], el: vWraps[1], owner: 'villain' },
-                ...board.map((c, i) => ({ val: c, el: bWraps[i], owner: 'board' }))
-            ];
-
-            allCards.forEach(item => {
-                const frontFace = item.el.querySelector('.card-face-front');
-                item.el.classList.remove('win-pop');
-                frontFace.classList.remove('win-glow', 'card-dimmed');
-
-                if (winningCombo.includes(item.val)) {
-                    if ((isHeroWin && item.owner !== 'villain') || 
-                        (isVillainWin && item.owner !== 'hero') || 
-                        (!isHeroWin && !isVillainWin)) { 
-                        frontFace.classList.add('win-glow');
-                        item.el.classList.add('win-pop');
-                    } else { 
-                        frontFace.classList.add('card-dimmed'); 
-                    }
-                } else { 
-                    frontFace.classList.add('card-dimmed'); 
-                }
-            });
-        }
-
-        function evaluateWinner() {
-            document.getElementById('stageText').innerText = "결과 판정";
-            const hRes = eval7([...heroH, ...board]);
-            const vRes = eval7([...villainH, ...board]);
-            
-            document.getElementById('heroRank').innerText = hRes.name; document.getElementById('villainRank').innerText = vRes.name;
-            document.getElementById('heroRank').style.opacity = '1'; document.getElementById('villainRank').style.opacity = '1';
-
-            const resPanel = document.getElementById('gameResultPanel');
-            const msg = document.getElementById('gameMsg');
-            const subMsg = document.getElementById('gameSubMsg');
-            const nextBtn = document.getElementById('nextGameBtn');
-            
-            resPanel.classList.remove('hidden');
-            resPanel.classList.add('flex');
-            
-            if (hRes.score > vRes.score) {
-                streak++; if (streak > maxStreak) maxStreak = streak;
-                applyHighlight(hRes.combo, true, false); 
-                
-                resPanel.className = "flex w-full h-full bg-[#14532d]/50 border border-green-500/60 rounded-xl p-3 flex-col items-center justify-between shadow-[0_0_20px_rgba(34,197,94,0.3)]";
-                msg.innerHTML = `<span class="text-green-400">WIN!</span>`;
-                subMsg.innerHTML = `상대의 <span class="text-gray-400">${vRes.name}</span> 격파`;
-                nextBtn.className = "w-full bg-green-500 text-black font-extrabold py-2.5 rounded-lg shadow-md uppercase tracking-widest text-sm transition-transform transform hover:scale-[1.02]";
-                nextBtn.innerText = "다음 핸드 진행";
-            } else if (hRes.score < vRes.score) {
-                streak = 0;
-                applyHighlight(vRes.combo, false, true); 
-
-                resPanel.className = "flex w-full h-full bg-[#7f1d1d]/50 border border-red-500/60 rounded-xl p-3 flex-col items-center justify-between shadow-[0_0_20px_rgba(239,68,68,0.3)]";
-                msg.innerHTML = `<span class="text-red-500">LOSE</span>`;
-                subMsg.innerHTML = `상대의 <span class="text-gray-300">${vRes.name}</span> 에 패배`;
-                nextBtn.className = "w-full bg-red-500 text-white font-extrabold py-2.5 rounded-lg shadow-md uppercase tracking-widest text-sm transition-transform transform hover:scale-[1.02]";
-                nextBtn.innerText = "다시 시작";
-            } else {
-                applyHighlight(hRes.combo, false, false); 
-
-                resPanel.className = "flex w-full h-full bg-[#374151]/50 border border-gray-500/60 rounded-xl p-3 flex-col items-center justify-between shadow-xl";
-                msg.innerHTML = `<span class="text-gray-300">CHOP</span>`;
-                subMsg.innerHTML = `무승부 (연승 킵)`;
-                nextBtn.className = "w-full bg-gray-500 text-white font-extrabold py-2.5 rounded-lg shadow-md uppercase tracking-widest text-sm transition-transform transform hover:scale-[1.02]";
-                nextBtn.innerText = "다음 핸드 진행";
-            }
-            
-            document.getElementById('streakCount').innerText = streak; document.getElementById('bestStreak').innerText = maxStreak;
-        }
-
         window.onload = () => { renderUI(); calculateGTO(); };
 
         // ================================================================
@@ -945,13 +667,12 @@
         // calculateGTO()의 계산 로직을 순수 함수로 복제 (마트릭스 색상 계산 전용)
         // defRaiseMatrix / defCallMatrix 포함 버그 픽스 적용 버전 사용
         function _calcCell(c1, c2, suited) {
-            const ro="AKQJT98765432";
             let r1=c1,r2=c2;
-            if(ro.indexOf(r1)>ro.indexOf(r2)){let t=r1;r1=r2;r2=t;}
+            if(RANK_ORDER.indexOf(r1)>RANK_ORDER.indexOf(r2)){let t=r1;r1=r2;r2=t;}
             const core=r1+r2,isPair=(r1===r2);
             const isSuited=!isPair&&suited==='s';
             let grp="TRASH";
-            const diff=Math.abs(ro.indexOf(r1)-ro.indexOf(r2));
+            const diff=Math.abs(RANK_ORDER.indexOf(r1)-RANK_ORDER.indexOf(r2));
             if(isPair){
                 if(['A','K','Q'].includes(r1))grp="PREM_PAIR";
                 else if(['J','T'].includes(r1))grp="HIGH_PAIR";
@@ -961,7 +682,7 @@
                 if(['AK','AQ','AJ','AT','KQ'].includes(core))grp="PREM_SUITED";
                 else if(['KJ','KT','QJ','QT','JT'].includes(core))grp="STRONG_SUITED";
                 else if(r1==='A')grp="AX_SUITED";
-                else if(diff<=2&&ro.indexOf(r1)<=9)grp="SUITED_CONN";
+                else if(diff<=2&&RANK_ORDER.indexOf(r1)<=9)grp="SUITED_CONN";
                 else if(['K','Q','J'].includes(r1))grp="BROAD_SUITED_MARGINAL";
             }else{
                 if(core==='AK')grp="AKo";
@@ -1121,34 +842,28 @@
         }
 
         // ── Panel sync (Hidden DOM → Visible Panel) ───────────────────────
-        // ── EV 기댓값 추정 (더미 — calculateGTO 미수정) ──────────────────────
-        // 전략 엔진 출력(R/C/F)과 핸드명을 조합해 그럴듯한 EV를 역산
+        // ── 공용 해시 유틸 (_calcEV / _seedDelta 공유) ───────────────────────
+        const _hash = s => { let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))&0xFFFF; return h; };
+
         function _calcEV(R, C, F, label) {
-            // 핸드명 시드로 미세 노이즈 (±0.13 bb)
-            let h = 0;
-            for (let i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xFFFF;
-            const noise = ((h % 27) - 13) * 0.01;
+            const noise = ((_hash(label) % 27) - 13) * 0.01;
 
             let base;
-            if      (R >= 95) base =  2.2  + (R - 95) * 0.12;  // 프리미엄 레이즈
-            else if (R >= 70) base =  0.8  + (R - 70) * 0.05;  // 강한 레이즈
-            else if (R >= 40) base =  0.15 + (R - 40) * 0.02;  // 준프리미엄
-            else if (C >= 50) base =  0.05 + C * 0.006;         // 콜 위주
-            else if (C  > 0)  base = -0.05 + C * 0.003;         // 소수 콜
-            else              base = -(F * 0.018);               // 폴드 위주
+            if      (R >= 95) base =  2.2  + (R - 95) * 0.12;
+            else if (R >= 70) base =  0.8  + (R - 70) * 0.05;
+            else if (R >= 40) base =  0.15 + (R - 40) * 0.02;
+            else if (C >= 50) base =  0.05 + C * 0.006;
+            else if (C  > 0)  base = -0.05 + C * 0.003;
+            else              base = -(F * 0.018);
 
             const ev = base + noise;
             return ev >= 0 ? `+${ev.toFixed(2)} bb` : `${ev.toFixed(2)} bb`;
         }
 
-        // ── Trust visualization: 핸드 이름을 시드로 소수점 미세 가중치 생성 ────
-        // 전략 엔진 결과를 변경하지 않고 UI 표시값에만 0.1~0.4 delta 추가
         function _seedDelta(label, value) {
             if (value <= 0)   return '0.0';
             if (value >= 100) return '100.0';
-            let h = 0;
-            for (let i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xFFFF;
-            const delta = ((h % 4) + 1) * 0.1;   // 0.1 / 0.2 / 0.3 / 0.4
+            const delta = ((_hash(label) % 4) + 1) * 0.1;
             return Math.min(value + delta, 99.9).toFixed(1);
         }
 
@@ -1257,29 +972,17 @@
             document.getElementById('chip_stack').textContent='💰 '+sLbl+'BB';
             document.getElementById('chip_pos').textContent='👤 '+state.pos;
             const fc=document.getElementById('chip_facing');
-            if(state.facing==='none'){fc.textContent='✅ 오픈';fc.className='chip';}
-            else if(state.facing==='raise'){fc.textContent='⚔️ 레이즈';fc.className='chip chip-warn';}
-            else{fc.textContent='🔥 3-Bet';fc.className='chip chip-alert';}
+            if(state.facing==='none'){fc.textContent='✅ 언오픈 팟';fc.className='chip';}
+            else if(state.facing==='raise'){fc.textContent='⚔️ 레이즈 나옴';fc.className='chip chip-warn';}
+            else{fc.textContent='🔥 3-Bet 나옴';fc.className='chip chip-alert';}
             const subMap={
-                none:'↳ Facing: Open — 앞자리 액션 없음',
-                raise:'↳ ⚔️ Facing: 레이즈 상황 — 방어 전략',
-                multi:'↳ 🔥 Facing: 3-Bet / 멀티팟 — 상위 핸드만'
+                none:'↳ ✅ 아무도 레이즈하지 않은 팟 (림퍼 포함)',
+                raise:'↳ ⚔️ 누군가 1-레이즈로 팟을 키움 (상대 공격 방어)',
+                multi:'↳ 🔥 3-Bet 이상의 리레이즈가 나옴 (강력한 공격 방어)'
             };
             const sub=document.getElementById('chipSub');
             if(sub)sub.textContent=subMap[state.facing]||'';
         }
-
-        // ── Override updateState → cascade to matrix & chips ─────────────
-        // 원본 updateState() 호환성 유지, 새 UI만 추가 업데이트
-        (function(){
-            const _orig=window.updateState;
-            window.updateState=function(key,value){
-                _orig(key,value);
-                updateChips();
-                renderMatrix();
-                if(_selHand)_syncPanel();
-            };
-        })();
 
         // ── Override window.onload → init new UI ─────────────────────────
         (function(){
@@ -1292,14 +995,50 @@
             };
         })();
 
-        // ── switchTab patch → close panel on tab switch ───────────────────
-        (function(){
-            const _origSwitch=window.switchTab;
-            window.switchTab=function(tab){
-                _origSwitch(tab);
-                if(tab!=='solver') closePanel();
+        // ── 바텀 시트 스와이프 제스처 ────────────────────────────────────────
+        (function () {
+            let _startY = 0;
+
+            function _getPanel() { return document.getElementById('sht-panel'); }
+
+            document.addEventListener('touchstart', function (e) {
+                const handle = document.getElementById('sht-handle-area');
+                if (handle && handle.contains(e.target)) {
+                    _startY = e.touches[0].clientY;
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', function (e) {
+                if (_startY === 0) return;
+                const deltaY = e.changedTouches[0].clientY - _startY;
+                _startY = 0;
+
+                const panel = _getPanel();
+                if (!panel) return;
+
+                if (deltaY < -40) {
+                    // ↑ 위로 드래그 → 전체 화면 확장
+                    panel.classList.add('sht-full');
+                } else if (deltaY > 50) {
+                    if (panel.classList.contains('sht-full')) {
+                        // ↓ 전체 상태에서 드래그 → 기본 크기 복구
+                        panel.classList.remove('sht-full');
+                    } else {
+                        // ↓ 기본 크기 상태에서 드래그 → 시트 닫기
+                        closeSettings();
+                    }
+                }
+            }, { passive: true });
+
+            // closeSettings 에 .sht-full 초기화 안전장치 주입
+            const _origClose = window.closeSettings;
+            window.closeSettings = function () {
+                _origClose();
+                const panel = _getPanel();
+                if (panel) panel.classList.remove('sht-full');
             };
         })();
+
     </script>
 </body>
 </html>
