@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>홀덤광장 Reactive - PRO</title>
+    <title>KJ Grid Reactive - PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -101,6 +101,95 @@
             transition:filter .15s;margin:16px 0 4px;
         }
         .s-apply-btn:active { filter:brightness(.85); }
+
+        /* ── GTO Training Tab ────────────────────────────────────────── */
+        #trainingTab { overflow:hidden; }
+        .tr-feature-card { border-radius:14px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);padding:16px;cursor:pointer;transition:transform .1s ease,filter .1s ease;-webkit-tap-highlight-color:transparent; }
+        .tr-feature-card:active { transform:scale(.97);filter:brightness(.85); }
+        .tr-feature-active { border-color:rgba(16,185,129,.28);background:rgba(16,185,129,.04); }
+        .tr-feature-soon { cursor:default;opacity:.35;pointer-events:none; }
+        .tr-coming-badge { font-size:10px;font-weight:700;color:#374151;background:rgba(55,65,81,.3);padding:2px 8px;border-radius:20px;border:1px solid rgba(55,65,81,.5); }
+        .tr-btn-primary { width:100%;padding:13px;border-radius:12px;border:none;background:#10B981;color:#000;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.04em;-webkit-tap-highlight-color:transparent;transition:filter .1s; }
+        .tr-btn-primary:active { filter:brightness(.82); }
+        .tr-ghost-btn { background:none;border:none;color:#6B7280;font-family:inherit;font-weight:700;cursor:pointer;padding:4px 8px;border-radius:8px;-webkit-tap-highlight-color:transparent;transition:color .1s; }
+        .tr-ghost-btn:active { color:#9CA3AF; }
+        /* Street badges */
+        .tr-badge { display:inline-flex;align-items:center;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:6px;margin-bottom:16px; }
+        .tr-badge.preflop { background:rgba(99,102,241,.18);color:#818CF8;border:1px solid rgba(99,102,241,.28); }
+        .tr-badge.flop    { background:rgba(16,185,129,.15);color:#34D399;border:1px solid rgba(16,185,129,.25); }
+        .tr-badge.turn    { background:rgba(245,158,11,.15);color:#FBBF24;border:1px solid rgba(245,158,11,.25); }
+        .tr-badge.river   { background:rgba(239,68,68,.15);color:#F87171;border:1px solid rgba(239,68,68,.25); }
+        /* Input groups */
+        .tr-sec-lbl { font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;display:block; }
+        .tr-ig { margin-bottom:18px; }
+        /* Option buttons (position / action) */
+        .tr-opt { flex:1;padding:9px 4px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:#1C2026;color:#9CA3AF;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .12s ease;white-space:nowrap;text-align:center;min-width:0;-webkit-tap-highlight-color:transparent; }
+        .tr-opt:active { transform:scale(.90); }
+        .tr-opt.tr-on  { background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:#10B981; }
+        .tr-opt.tr-agg { background:rgba(225,29,72,.15);border-color:rgba(225,29,72,.4);color:#E11D48; }
+        /* Card slot */
+        .tr-card { width:52px;height:72px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#1C2026;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .12s ease;-webkit-tap-highlight-color:transparent;user-select:none; }
+        .tr-card:active { transform:scale(.88); }
+        .tr-card.c-filled { border-color:rgba(255,255,255,.2); }
+        .tr-card.c-active { border-color:rgba(59,130,246,.6);background:rgba(59,130,246,.08);box-shadow:0 0 0 2px rgba(59,130,246,.18); }
+        /* Card picker */
+        .tr-picker { background:#13161A;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;margin-top:10px; }
+        .tr-pk { padding:7px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:#1C2026;color:#9CA3AF;font-family:'SF Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;min-width:30px;text-align:center;-webkit-tap-highlight-color:transparent;transition:all .1s; }
+        .tr-pk:active { transform:scale(.85); }
+        .tr-pk.pk-on { background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.5);color:#60A5FA; }
+        /* Number input */
+        .tr-input { background:#1C2026;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:9px 12px;color:#F9FAFB;font-family:'SF Mono',monospace;font-size:15px;font-weight:700;outline:none;-webkit-appearance:none;width:90px; }
+        .tr-input:focus { border-color:rgba(16,185,129,.4); }
+        /* Progress bar */
+        .tr-progress { height:3px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden; }
+        .tr-progress-fill { height:100%;background:#10B981;border-radius:99px;transition:width .3s ease; }
+        /* Nav footer buttons */
+        .tr-nav { padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#1C2026;color:#9CA3AF;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:filter .1s; }
+        .tr-nav:active { filter:brightness(.78); }
+        .tr-nav-p { background:#10B981;border-color:#10B981;color:#000; }
+        /* Result cards */
+        .tr-rc { border-radius:16px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);padding:16px;margin-bottom:10px; }
+        .tr-rc.ex { border-color:rgba(16,185,129,.28);background:rgba(16,185,129,.025); }
+        .tr-rc.gd { border-color:rgba(234,179,8,.28);background:rgba(234,179,8,.025); }
+        .tr-rc.mk { border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.025); }
+        /* Board card in result */
+        .tr-bc { width:38px;height:54px;border-radius:7px;border:1px solid rgba(255,255,255,.15);background:#1C2026;display:flex;flex-direction:column;align-items:center;justify-content:center; }
+        .tr-bc-r { font-size:14px;font-weight:900;font-family:'SF Mono',monospace;line-height:1; }
+        .tr-bc-s { font-size:11px;margin-top:2px; }
+        /* ── HUD 6-Max Table ──────────────────────────────────────────── */
+        .hud-seat { width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.28);font-family:inherit;font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.03em;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:all .22s ease; }
+        .hud-seat:active { transform:scale(.82);box-shadow:inset 0 2px 4px rgba(0,0,0,.6); }
+        .hud-on      { background:rgba(16,185,129,.18)!important;border-color:rgba(16,185,129,.55)!important;color:#10B981!important;box-shadow:0 0 14px rgba(16,185,129,.38),0 0 5px rgba(16,185,129,.22) inset!important; }
+        .hud-vill-on { background:rgba(251,113,133,.18)!important;border-color:rgba(251,113,133,.55)!important;color:#FB7185!important;box-shadow:0 0 14px rgba(251,113,133,.38),0 0 5px rgba(251,113,133,.22) inset!important; }
+
+        /* ── Tactile inset-press feel ──────────────────────────────────── */
+        .mcell:active { transform:scale(.80);filter:brightness(.68);box-shadow:inset 0 2px 4px rgba(0,0,0,.5); }
+        .chip:active  { filter:brightness(.72);transform:scale(.93);box-shadow:inset 0 2px 4px rgba(0,0,0,.35); }
+
+        /* ── Tabular numeric anchoring ─────────────────────────────────── */
+        #pEV,#pRPct,#pCPct,#pFPct { font-variant-numeric:tabular-nums;font-feature-settings:'tnum'; }
+
+        /* ── Postflop condition chip bar ───────────────────────────────── */
+        .pf-chip { display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;padding:5px 11px;border-radius:100px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#9CA3AF;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s ease;-webkit-tap-highlight-color:transparent; }
+        .pf-chip:active { filter:brightness(.72);transform:scale(.93); }
+        .pf-chip.pf-on  { background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.35);color:#34D399; }
+        .pf-chip.pf-bet { background:rgba(251,113,133,.1);border-color:rgba(251,113,133,.3);color:#FB7185; }
+
+        /* ── PRO teaser box ────────────────────────────────────────────── */
+        .pro-teaser { border-radius:10px;background:rgba(16,185,129,.04);border:1px solid rgba(16,185,129,.2);padding:12px;margin-top:12px; }
+
+        /* ── Postflop Matrix container ─────────────────────────────────── */
+        #postflopMatrix { display:grid;grid-template-columns:repeat(13,1fr);gap:0.5px;width:100%;aspect-ratio:1;touch-action:manipulation; }
+        /* ── Postflop Panel (독립 fixed overlay) ─────────────────────── */
+        #postflopPanel { position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(112%);width:100%;max-width:448px;z-index:45;padding:0 10px 12px;pointer-events:none;transition:transform .38s cubic-bezier(.32,.72,0,1); }
+        #postflopPanel.pfp-open { transform:translateX(-50%) translateY(0);pointer-events:all; }
+
+        /* ── Postflop Sheet (board / pot picker) ──────────────────────── */
+        #postflopSheet { position:fixed;inset:0;z-index:55;opacity:0;pointer-events:none;transition:opacity .25s ease; }
+        #postflopSheet.pfs-open { opacity:1;pointer-events:all; }
+        #pfs-backdrop { position:absolute;inset:0;background:rgba(0,0,0,.74); }
+        #pfs-panel { position:absolute;bottom:0;left:0;right:0;max-width:448px;margin:0 auto;background:#13161A;border-top:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:0 16px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:78vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px); }
+        #postflopSheet.pfs-open #pfs-panel { transform:translateY(0); }
     </style>
 </head>
 <body>
@@ -265,6 +354,117 @@
             <div class="text-[9px] text-gray-500 font-bold tracking-widest uppercase mb-1">💡 Strategy Note</div>
             <p id="pStrategy" class="text-[12px] text-gray-300 leading-relaxed break-keep m-0"></p>
         </div>
+        <!-- PRO Teaser -->
+        <div class="pro-teaser">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <span style="font-size:18px;">🔒</span>
+                <div>
+                    <div style="font-size:10px;font-weight:800;color:#10B981;letter-spacing:.1em;text-transform:uppercase;">PRO: AI Strategy Note</div>
+                    <div style="font-size:11px;color:#6B7280;margin-top:1px;">왜 이 사이즈를 섞을까요?</div>
+                </div>
+            </div>
+            <p style="font-size:11px;color:#4B5563;line-height:1.55;margin:0 0 10px;">이 핸드는 보드에서 넛 에퀴티 우위를 가집니다. GTO가 33% 사이징을 75% 빈도로 섞는 이유는 상대의 콜링 레인지를 최대한 넓게 유지하기 위함입니다...</div>
+            <button style="width:100%;padding:9px;border-radius:8px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.28);color:#10B981;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;">PRO 업그레이드 →</button>
+        </div>
+    </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║  POSTFLOP RESULT PANEL (독립 패널)      ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<div id="postflopPanel">
+    <div style="background:rgba(10,12,16,.92);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:16px 16px 14px;box-shadow:0 -8px 32px rgba(0,0,0,.55),0 4px 24px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);">
+        <!-- Row 1: Hand + Context badge + Close -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+            <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                    <span id="pfpHand" style="font-family:'SF Mono',monospace;font-size:24px;font-weight:900;color:#F9FAFB;letter-spacing:.04em;">AKs</span>
+                    <span id="pfpBadge" style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid rgba(251,113,133,.3);background:rgba(251,113,133,.1);color:#FB7185;">Monster</span>
+                </div>
+                <div id="pfpContext" style="font-size:10px;color:#4B5563;font-weight:600;letter-spacing:.04em;">Flop · OOP · vs Check</div>
+            </div>
+            <button onclick="closePostflopPanel()" style="color:#6B7280;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:8px;width:28px;height:28px;min-width:28px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;margin-left:10px;flex-shrink:0;">✕</button>
+        </div>
+
+        <!-- Row 2: Segmented action bars -->
+        <div style="margin-bottom:12px;">
+            <div style="font-size:9px;color:#4B5563;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:9px;">GTO ACTION MIX</div>
+            <!-- Check -->
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <span style="width:148px;font-size:10px;color:#9CA3AF;font-weight:600;flex-shrink:0;letter-spacing:.02em;">Check</span>
+                <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">
+                    <div id="pfpCheckBar" style="height:100%;width:0%;background:#34D399;border-radius:99px;transition:width .45s ease;"></div>
+                </div>
+                <span id="pfpCheckPct" style="width:34px;text-align:right;font-size:12px;font-weight:800;color:#34D399;font-variant-numeric:tabular-nums;">0%</span>
+            </div>
+            <!-- Pot 33% Bet -->
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <span style="width:148px;font-size:10px;color:#9CA3AF;font-weight:600;flex-shrink:0;letter-spacing:.02em;">Pot 33% Bet</span>
+                <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">
+                    <div id="pfpBet33Bar" style="height:100%;width:0%;background:#FB7185;border-radius:99px;transition:width .45s ease;"></div>
+                </div>
+                <span id="pfpBet33Pct" style="width:34px;text-align:right;font-size:12px;font-weight:800;color:#FB7185;font-variant-numeric:tabular-nums;">0%</span>
+            </div>
+            <!-- Pot 75% Bet -->
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <span style="width:148px;font-size:10px;color:#9CA3AF;font-weight:600;flex-shrink:0;letter-spacing:.02em;">Pot 75% Bet</span>
+                <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">
+                    <div id="pfpBet75Bar" style="height:100%;width:0%;background:#E11D48;border-radius:99px;transition:width .45s ease;"></div>
+                </div>
+                <span id="pfpBet75Pct" style="width:34px;text-align:right;font-size:12px;font-weight:800;color:#E11D48;font-variant-numeric:tabular-nums;">0%</span>
+            </div>
+            <!-- Pot 150% Bet (Overbet) -->
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="width:148px;font-size:10px;color:#9CA3AF;font-weight:600;flex-shrink:0;letter-spacing:.02em;">Pot 150% Bet (OB)</span>
+                <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">
+                    <div id="pfpOBBar" style="height:100%;width:0%;background:#A855F7;border-radius:99px;transition:width .45s ease;"></div>
+                </div>
+                <span id="pfpOBPct" style="width:34px;text-align:right;font-size:12px;font-weight:800;color:#A855F7;font-variant-numeric:tabular-nums;">0%</span>
+            </div>
+        </div>
+
+        <!-- Row 3: Recommended + Grade -->
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:12px;">
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:9px;color:#4B5563;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">RECOMMENDED</div>
+                <div id="pfpRec" style="font-size:14px;font-weight:800;color:#FB7185;font-variant-numeric:tabular-nums;line-height:1.3;">Pot 75% Bet <span style="font-size:11px;color:#6B7280;font-weight:600;">(빈도: 63%)</span></div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+                <div style="font-size:9px;color:#4B5563;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">GRADE</div>
+                <div id="pfpGrade" style="font-size:14px;letter-spacing:1px;color:#10B981;">★★★★★</div>
+            </div>
+        </div>
+
+        <!-- Row 4: PRO teaser -->
+        <div style="border-radius:10px;background:rgba(16,185,129,.04);border:1px solid rgba(16,185,129,.2);padding:12px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <span style="font-size:16px;">🔒</span>
+                <div>
+                    <div style="font-size:10px;font-weight:800;color:#10B981;letter-spacing:.1em;text-transform:uppercase;">PRO: AI Strategy Note</div>
+                    <div style="font-size:11px;color:#6B7280;margin-top:1px;">왜 33% 벳을 섞을까요?</div>
+                </div>
+            </div>
+            <p id="pfpNote" style="font-size:11px;color:#4B5563;line-height:1.55;margin:0 0 10px;">이 핸드의 넛 에퀴티 분포를 고려할 때, 33% 사이징은 상대의 콜링 레인지를 최대한 넓게 유지합니다...</p>
+            <button style="width:100%;padding:9px;border-radius:8px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.28);color:#10B981;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">PRO 업그레이드 →</button>
+        </div>
+    </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║  POSTFLOP BOARD / POT PICKER SHEET      ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+<div id="postflopSheet">
+    <div id="pfs-backdrop" onclick="closePostflopSheet()"></div>
+    <div id="pfs-panel">
+        <div style="display:flex;justify-content:center;padding:12px 0 6px;">
+            <div style="width:36px;height:4px;background:#374151;border-radius:99px;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0 14px;border-bottom:1px solid var(--bdr);">
+            <span id="pfs-title" style="font-size:17px;font-weight:900;color:var(--t1);">보드 설정</span>
+            <button onclick="closePostflopSheet()" style="color:var(--t3);background:var(--s2);border:1px solid var(--bdr);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+        <div id="pfs-body" style="padding:14px 0;min-height:200px;"></div>
+        <button onclick="applyPostflopSheet()" class="s-apply-btn">적용하기</button>
     </div>
 </div>
 
@@ -287,11 +487,8 @@
 
     <!-- Tab Bar -->
     <div style="display:flex;border-bottom:1px solid rgba(255,255,255,.06);padding:0 16px;flex-shrink:0;">
-        <button id="tab_solver" class="flex-1 pb-2 tab-active transition-colors" style="font-size:12px;font-weight:700;background:none;border:none;cursor:pointer;padding-top:8px;padding-bottom:9px;">🧠 프리플랍 엔진</button>
-        <button disabled style="flex:1;padding:8px 0 9px;background:none;border:none;cursor:not-allowed;display:flex;align-items:center;justify-content:center;gap:5px;opacity:.45;">
-            <span style="font-size:12px;font-weight:700;color:#6B7280;">📝 GTO 트레이닝</span>
-            <span style="font-size:8px;font-weight:700;color:#10B981;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);padding:1px 5px;border-radius:4px;letter-spacing:.04em;">준비중</span>
-        </button>
+        <button id="tab_solver"   onclick="switchTab('solver')"   class="flex-1 pb-2 tab-active transition-colors"   style="font-size:12px;font-weight:700;background:none;border:none;cursor:pointer;padding-top:8px;padding-bottom:9px;">🧠 프리플랍 엔진</button>
+        <button id="tab_training" onclick="switchTab('training')" class="flex-1 pb-2 tab-inactive transition-colors" style="font-size:12px;font-weight:700;background:none;border:none;cursor:pointer;padding-top:8px;padding-bottom:9px;">📝 GTO 트레이닝</button>
     </div>
 
     <!-- ╔══════════════════════════════════════════╗ -->
@@ -299,13 +496,49 @@
     <!-- ╚══════════════════════════════════════════╝ -->
     <div id="solverTab" style="display:flex;flex-direction:column;flex:1;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px);">
 
-        <!-- Global Context Bar -->
-        <div class="px-3.5 pt-2 pb-1 flex-shrink-0">
+        <!-- HUD 6-Max Table + Context Chips -->
+        <div style="padding:8px 14px 4px;flex-shrink:0;">
+
+            <!-- ── Compact HUD Poker Table ─────────────────────── -->
+            <div style="position:relative;height:120px;margin-bottom:8px;">
+                <!-- Oval felt surface -->
+                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:56%;height:68px;border-radius:999px;background:linear-gradient(160deg,rgba(16,185,129,.05),rgba(16,185,129,.02));border:1px solid rgba(16,185,129,.14);box-shadow:inset 0 0 28px rgba(0,0,0,.4);pointer-events:none;"></div>
+                <!-- Center label -->
+                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;">
+                    <span style="font-size:7px;color:rgba(255,255,255,.1);font-weight:800;letter-spacing:.16em;text-transform:uppercase;">6-MAX</span>
+                    <div style="width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);"></div>
+                </div>
+                <!-- EP — 10 o'clock -->
+                <div style="position:absolute;top:4%;left:20%;">
+                    <button id="hud-EP"  class="hud-seat" onclick="updateState('pos','EP')">EP</button>
+                </div>
+                <!-- MP — 2 o'clock -->
+                <div style="position:absolute;top:4%;right:20%;">
+                    <button id="hud-MP"  class="hud-seat" onclick="updateState('pos','MP')">MP</button>
+                </div>
+                <!-- CO — 3 o'clock -->
+                <div style="position:absolute;top:50%;right:4%;transform:translateY(-50%);">
+                    <button id="hud-CO"  class="hud-seat" onclick="updateState('pos','CO')">CO</button>
+                </div>
+                <!-- BTN — 5 o'clock -->
+                <div style="position:absolute;bottom:4%;right:20%;">
+                    <button id="hud-BTN" class="hud-seat" style="font-size:10px;" onclick="updateState('pos','BTN')">BTN</button>
+                </div>
+                <!-- SB — 7 o'clock -->
+                <div style="position:absolute;bottom:4%;left:20%;">
+                    <button id="hud-SB"  class="hud-seat" onclick="updateState('pos','SB')">SB</button>
+                </div>
+                <!-- BB — 9 o'clock -->
+                <div style="position:absolute;top:50%;left:4%;transform:translateY(-50%);">
+                    <button id="hud-BB"  class="hud-seat" onclick="updateState('pos','BB')">BB</button>
+                </div>
+            </div>
+
+            <!-- Remaining condition chips (position now in HUD) -->
             <div class="flex gap-1.5 overflow-x-auto pb-1 hide-sb">
                 <button class="chip" id="chip_level"  onclick="openSettings('level')">🎯 데일리</button>
                 <button class="chip" id="chip_stack"  onclick="openSettings('stack')">💰 100BB</button>
-                <button class="chip" id="chip_pos"    onclick="openSettings('pos')">👤 EP</button>
-                <button class="chip" id="chip_facing" onclick="openSettings('facing')">✅ 오픈</button>
+                <button class="chip" id="chip_facing" onclick="openSettings('facing')">✅ 언오픈 팟</button>
             </div>
             <div id="chipSub" class="text-[11px] text-gray-600 pt-1 pl-0.5 min-h-[18px]"></div>
         </div>
@@ -337,6 +570,102 @@
 
     </div>
 
+    <!-- ╔══════════════════════════════════════════╗ -->
+    <!-- ║  GTO TRAINING TAB  —  3-Layer Layout   ║ -->
+    <!-- ╚══════════════════════════════════════════╝ -->
+    <div id="trainingTab" style="display:none;flex-direction:column;flex:1;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px);">
+
+        <!-- ─── 1층: Postflop 조건 칩 바 ──────────────────────────────── -->
+        <div style="padding:8px 12px 0;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06);">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;padding:4px 0 6px;row-gap:6px;">
+                <!-- Street -->
+                <button class="pf-chip pf-on" id="pf-flop"  onclick="setPfStreet('flop')">Flop</button>
+                <button class="pf-chip"        id="pf-turn"  onclick="setPfStreet('turn')">Turn</button>
+                <button class="pf-chip"        id="pf-river" onclick="setPfStreet('river')">River</button>
+                <div style="width:1px;background:rgba(255,255,255,.07);flex-shrink:0;margin:4px 2px;"></div>
+                <!-- Board (tappable → picker sheet) -->
+                <button class="pf-chip" id="pf-board" onclick="showPostflopSheet('board')" style="font-family:'SF Mono',monospace;font-size:12px;letter-spacing:.04em;">A<span style="color:#F87171;">♠</span> Q<span style="color:#F87171;">♦</span> 7♣</button>
+                <!-- Pot (tappable → picker sheet) -->
+                <button class="pf-chip" id="pf-pot" onclick="showPostflopSheet('pot')">팟 5BB</button>
+                <div style="width:1px;background:rgba(255,255,255,.07);flex-shrink:0;margin:4px 2px;"></div>
+                <!-- Villain action -->
+                <button class="pf-chip pf-on" id="pf-vcheck" onclick="setPfVillain('check')">상대: 체크</button>
+                <button class="pf-chip"        id="pf-vbet"   onclick="setPfVillain('bet')">상대: 베팅</button>
+                <div style="width:1px;background:rgba(255,255,255,.07);flex-shrink:0;margin:4px 2px;"></div>
+                <!-- Position (synced with HUD below) -->
+                <button class="pf-chip pf-on" id="pf-oop" onclick="setPfPos('oop')">OOP (먼저 액션)</button>
+                <button class="pf-chip"        id="pf-ip"  onclick="setPfPos('ip')">IP (나중 액션)</button>
+                <!-- 우측 끝 잘림 방지 스페이서 -->
+                <div style="min-width:12px;flex-shrink:0;"></div>
+            </div>
+            <div id="pfSub" style="font-size:10px;color:#4B5563;padding:2px 0 4px;min-height:16px;"></div>
+        </div>
+
+        <!-- ─── 2층: HUD 6-Max Table (pfState.pos 연동) ──────────────── -->
+        <div style="padding:8px 14px 4px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.05);">
+            <div style="position:relative;height:116px;">
+                <!-- Oval surface -->
+                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:56%;height:66px;border-radius:999px;background:linear-gradient(160deg,rgba(251,113,133,.05),rgba(251,113,133,.02));border:1px solid rgba(251,113,133,.14);box-shadow:inset 0 0 28px rgba(0,0,0,.4);pointer-events:none;"></div>
+                <!-- Center: Hero / Villain toggle -->
+                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10;">
+                    <div style="display:flex;gap:2px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px;">
+                        <button id="pf-hero-btn" onclick="setPfHudMode('hero')" style="padding:3px 10px;border-radius:18px;border:none;font-size:9px;font-weight:800;cursor:pointer;background:rgba(16,185,129,.3);color:#10B981;font-family:inherit;-webkit-tap-highlight-color:transparent;transition:all .15s;">👤 내 자리</button>
+                        <button id="pf-vill-btn" onclick="setPfHudMode('villain')" style="padding:3px 10px;border-radius:18px;border:none;font-size:9px;font-weight:800;cursor:pointer;background:none;color:#4B5563;font-family:inherit;-webkit-tap-highlight-color:transparent;transition:all .15s;">👿 상대 자리</button>
+                    </div>
+                </div>
+                <!-- EP -->
+                <div style="position:absolute;top:4%;left:20%;">
+                    <button id="pf-hud-EP"  class="hud-seat" onclick="setPfPos('ep')">EP</button>
+                </div>
+                <!-- MP -->
+                <div style="position:absolute;top:4%;right:20%;">
+                    <button id="pf-hud-MP"  class="hud-seat" onclick="setPfPos('mp')">MP</button>
+                </div>
+                <!-- CO -->
+                <div style="position:absolute;top:50%;right:4%;transform:translateY(-50%);">
+                    <button id="pf-hud-CO"  class="hud-seat" onclick="setPfPos('co')">CO</button>
+                </div>
+                <!-- BTN -->
+                <div style="position:absolute;bottom:4%;right:20%;">
+                    <button id="pf-hud-BTN" class="hud-seat" style="font-size:10px;" onclick="setPfPos('btn')">BTN</button>
+                </div>
+                <!-- SB -->
+                <div style="position:absolute;bottom:4%;left:20%;">
+                    <button id="pf-hud-SB"  class="hud-seat" onclick="setPfPos('sb')">SB</button>
+                </div>
+                <!-- BB -->
+                <div style="position:absolute;top:50%;left:4%;transform:translateY(-50%);">
+                    <button id="pf-hud-BB"  class="hud-seat" onclick="setPfPos('bb')">BB</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── 3층: 13×13 Postflop Matrix ────────────────────────────── -->
+        <div style="padding:8px 10px 0;flex:1;display:flex;flex-direction:column;">
+            <div id="postflopMatrix"></div>
+            <!-- Legend -->
+            <div style="display:flex;justify-content:center;gap:12px;margin-top:10px;padding-bottom:8px;flex-shrink:0;">
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:9px;height:9px;border-radius:2px;background:#34D399;"></div>
+                    <span style="font-size:10px;color:var(--t2);font-weight:600;">Check</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:9px;height:9px;border-radius:2px;background:#FB7185;"></div>
+                    <span style="font-size:10px;color:var(--t2);font-weight:600;">Bet 33%</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:9px;height:9px;border-radius:2px;background:#E11D48;"></div>
+                    <span style="font-size:10px;color:var(--t2);font-weight:600;">Bet 75%</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div style="width:9px;height:9px;border-radius:2px;background:#A855F7;"></div>
+                    <span style="font-size:10px;color:var(--t2);font-weight:600;">OB</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
     <!-- 스크립트 엔진 -->
 
     <!-- ╔══════════════════════════════════════════╗ -->
@@ -359,8 +688,335 @@
 
     <script>
         function switchTab(tab) {
-            document.getElementById('solverTab').style.display = 'flex';
+            const isSolver = !tab || tab === 'solver';
+            document.getElementById('solverTab').style.display   = isSolver ? 'flex' : 'none';
+            document.getElementById('trainingTab').style.display = isSolver ? 'none' : 'flex';
+            const ts = document.getElementById('tab_solver');
+            const tt = document.getElementById('tab_training');
+            if (ts) ts.className = `flex-1 pb-2 transition-colors ${isSolver ? 'tab-active' : 'tab-inactive'}`;
+            if (tt) tt.className = `flex-1 pb-2 transition-colors ${isSolver ? 'tab-inactive' : 'tab-active'}`;
+            if (!isSolver) {
+                const fp = document.getElementById('floatingPanel');
+                if (fp) fp.classList.remove('panel-open');
+                renderPostflopMatrix(); // ← postflop matrix on first switch
+            }
         }
+
+        // ================================================================
+        // POSTFLOP MATRIX MODULE  v2.0
+        // 🚨 calculateGTO() / renderUI() 완전 격리 — 포스트플랍 전용
+        // ================================================================
+        const pfState = {
+            street: 'flop', villain: 'check',
+            pos: 'oop',         // analysis OOP/IP (used by _pfCellAnalysis)
+            heroPos: 'btn',     // HUD hero seat (ep|mp|co|btn|sb|bb)
+            villainPos: 'bb',   // HUD villain seat
+            hudMode: 'hero',    // which role HUD click assigns ('hero'|'villain')
+            board: [{r:'A',s:'s'},{r:'Q',s:'d'},{r:'7',s:'c'},{r:'2',s:'h'},{r:'9',s:'s'}],
+            pot: 5.0, _pickerType: null, _pickerCard: null
+        };
+
+        function _pfCellAnalysis(c1, c2, suited) {
+            const isPair = c1 === c2;
+            const rIdx   = RANK_ORDER.indexOf(c1);
+            const r2Idx  = RANK_ORDER.indexOf(c2);
+            const diff   = Math.abs(rIdx - r2Idx);
+            let str;
+            if (isPair && rIdx <= 1)              str = 'monster';
+            else if (isPair && rIdx === 2)         str = 'monster';
+            else if (isPair && rIdx === 5)         str = 'monster';
+            else if (c1==='A' && c2==='Q')         str = 'monster';
+            else if (c1==='A')                     str = 'strong';
+            else if (isPair && rIdx <= 4)          str = 'medium';
+            else if (c1==='Q')                     str = 'medium';
+            else if (suited && diff<=2 && rIdx>=3 && rIdx<=9) str='draw';
+            else if (suited && rIdx<=3)            str = 'draw';
+            else                                   str = 'air';
+            const bases = {
+                monster: { check:5,  bet33:18, bet75:52, ob:25, fold:0  },
+                strong:  { check:22, bet33:46, bet75:27, ob:5,  fold:0  },
+                medium:  { check:50, bet33:35, bet75:12, ob:3,  fold:0  },
+                draw:    { check:38, bet33:40, bet75:18, ob:4,  fold:0  },
+                air:     { check:68, bet33:20, bet75:10, ob:2,  fold:0  },
+            };
+            let b = { ...bases[str] };
+            if (pfState.street === 'turn') {
+                b.check = Math.max(0, b.check - 12); b.bet33 = Math.max(0, b.bet33 - 4);
+                b.bet75 += 12; b.ob += 4;
+            } else if (pfState.street === 'river') {
+                b.check = Math.max(0, b.check - 22); b.bet33 = Math.max(0, b.bet33 - 12);
+                b.bet75 += 18; b.ob += 10;
+                if (str === 'air') { b.check=82; b.bet33=8; b.bet75=8; b.ob=2; }
+            }
+            if (pfState.villain === 'bet') {
+                const excess = b.bet33 * 0.8;
+                b.check = b.check * 0.45; b.bet33 = Math.max(0, b.bet33 * 0.2);
+                b.bet75 = b.bet75 * 1.35; b.ob += excess * 0.25;
+                b.fold  = Math.max(0, 100 - b.check - b.bet33 - b.bet75 - b.ob);
+            }
+            if (['ip','co','btn'].includes(pfState.pos)) {
+                b.check = Math.max(0, b.check - 6); b.bet33 = b.bet33 * 1.12;
+            }
+            const sum = b.check + b.bet33 + b.bet75 + b.ob + (b.fold || 0);
+            const sc  = sum > 0 ? 100 / sum : 1;
+            return { check:Math.round(b.check*sc), bet33:Math.round(b.bet33*sc),
+                     bet75:Math.round(b.bet75*sc), overbet:Math.round(b.ob*sc),
+                     fold:Math.round((b.fold||0)*sc), str };
+        }
+
+        function _pfCellBg(c1, c2, suited) {
+            const BET_S='#FB7185', BET_L='#E11D48', OB='#A855F7', CHK='#34D399', FOLD='#0D1117';
+            const d = _pfCellAnalysis(c1, c2, suited);
+            if ((d.fold||0) >= 88) return FOLD;
+            if (d.check >= 90) return CHK;
+            const parts = []; let p = 0;
+            if (d.bet33  > 0) { parts.push(`${BET_S} ${p}%`,`${BET_S} ${p+d.bet33}%`);  p += d.bet33;  }
+            if (d.bet75  > 0) { parts.push(`${BET_L} ${p}%`,`${BET_L} ${p+d.bet75}%`);  p += d.bet75;  }
+            if (d.overbet> 0) { parts.push(`${OB}    ${p}%`,`${OB}    ${p+d.overbet}%`); p += d.overbet; }
+            if (d.check  > 0) { parts.push(`${CHK}   ${p}%`,`${CHK}   ${p+d.check}%`);  p += d.check;  }
+            if (p < 100)      { parts.push(`${FOLD}  ${p}%`,`${FOLD}  100%`); }
+            return parts.length ? `linear-gradient(to top,${parts.join(',')})` : FOLD;
+        }
+
+        function setPfStreet(s) {
+            pfState.street = s;
+            ['flop','turn','river'].forEach(k => { const el=document.getElementById('pf-'+k); if(el)el.classList.toggle('pf-on',k===s); });
+            _refreshBoardChip(); _updatePfSub(); renderPostflopMatrix();
+        }
+        function setPfVillain(v) {
+            pfState.villain = v;
+            const ce=document.getElementById('pf-vcheck'), be=document.getElementById('pf-vbet');
+            if(ce)ce.classList.toggle('pf-on',v==='check');
+            if(be){be.classList.toggle('pf-on',v==='bet');be.classList.toggle('pf-bet',v==='bet');}
+            _updatePfSub(); renderPostflopMatrix();
+        }
+        function setPfPos(p) {
+            if (p === 'oop' || p === 'ip') {
+                // OOP/IP 분석 칩 (chip bar)
+                pfState.pos = p;
+                const oe=document.getElementById('pf-oop'), ie=document.getElementById('pf-ip');
+                if(oe)oe.classList.toggle('pf-on', p==='oop');
+                if(ie)ie.classList.toggle('pf-on', p==='ip');
+            } else {
+                // HUD 좌석 클릭 → hudMode에 따라 히어로/빌런 라우팅
+                if (pfState.hudMode === 'villain') {
+                    pfState.villainPos = p;
+                } else {
+                    pfState.heroPos = p;
+                    pfState.pos = ['co','btn'].includes(p) ? 'ip' : 'oop';
+                    const oe=document.getElementById('pf-oop'), ie=document.getElementById('pf-ip');
+                    if(oe)oe.classList.toggle('pf-on', pfState.pos==='oop');
+                    if(ie)ie.classList.toggle('pf-on', pfState.pos==='ip');
+                }
+            }
+            updatePfHud(); _updatePfSub(); renderPostflopMatrix();
+        }
+        function setPfHudMode(mode) {
+            pfState.hudMode = mode;
+            const hBtn=document.getElementById('pf-hero-btn'), vBtn=document.getElementById('pf-vill-btn');
+            if(hBtn){ hBtn.style.background=mode==='hero'?'rgba(16,185,129,.3)':'none'; hBtn.style.color=mode==='hero'?'#10B981':'#4B5563'; }
+            if(vBtn){ vBtn.style.background=mode==='villain'?'rgba(251,113,133,.3)':'none'; vBtn.style.color=mode==='villain'?'#FB7185':'#4B5563'; }
+        }
+        function updatePfHud() {
+            ['ep','mp','co','btn','sb','bb'].forEach(k => {
+                const el=document.getElementById('pf-hud-'+k.toUpperCase()); if(!el)return;
+                el.classList.remove('hud-on','hud-vill-on');
+                if(k===pfState.heroPos)    el.classList.add('hud-on');        // 초록 네온
+                if(k===pfState.villainPos) el.classList.add('hud-vill-on');   // 빨간 네온
+            });
+        }
+        function _updatePfSub() {
+            const sub=document.getElementById('pfSub'); if(!sub)return;
+            const sm={flop:'플랍',turn:'턴',river:'리버'}, vm={check:'빌런 체크',bet:'빌런 베팅'};
+            const SY={s:'♠',h:'♥',d:'♦',c:'♣'};
+            const cnt={flop:3,turn:4,river:5}[pfState.street]||3;
+            const bd=pfState.board.slice(0,cnt).map(c=>c&&c.r?c.r+(SY[c.s]||'?'):'?').join(' ');
+            const hp=(pfState.heroPos||'??').toUpperCase();
+            const vp=(pfState.villainPos||'??').toUpperCase();
+            sub.textContent=`↳ ${sm[pfState.street]} [${bd}] · ${vm[pfState.villain]} · 👤${hp} vs 👿${vp}`;
+        }
+
+        // ── Board / Pot picker sheet ──────────────────────────────────────
+        function showPostflopSheet(type) {
+            pfState._pickerType = type;
+            if (type === 'board') {
+                // 첫 번째 미완성 슬롯부터 포커스
+                const cnt = {flop:3,turn:4,river:5}[pfState.street]||3;
+                let firstIncomplete = 0;
+                for (let i=0; i<cnt; i++) {
+                    const c=pfState.board[i];
+                    if (!c || !c.r || !c.s) { firstIncomplete=i; break; }
+                    if (i===cnt-1) firstIncomplete=0; // all complete → start from 0
+                }
+                pfState._pickerCard = firstIncomplete;
+            } else {
+                pfState._pickerCard = null;
+            }
+            const t=document.getElementById('pfs-title');
+            if(t)t.textContent=type==='board'?'보드 카드 설정':'팟 사이즈 설정';
+            _renderPfsBody();
+            const sh=document.getElementById('postflopSheet'); if(sh)sh.classList.add('pfs-open');
+        }
+        function closePostflopSheet() { const sh=document.getElementById('postflopSheet'); if(sh)sh.classList.remove('pfs-open'); }
+        function applyPostflopSheet() {
+            if(pfState._pickerType==='pot'){
+                const inp=document.getElementById('pfs-pot-input');
+                if(inp)pfState.pot=parseFloat(inp.value)||pfState.pot;
+                const btn=document.getElementById('pf-pot'); if(btn)btn.textContent=`팟 ${pfState.pot}BB`;
+            } else { _refreshBoardChip(); }
+            closePostflopSheet(); renderPostflopMatrix();
+        }
+        function _setPfsCard(idx, field, val) {
+            if (!pfState.board[idx]) pfState.board[idx] = {};
+            // 이 클릭 직전의 완성 여부 스냅샷 (숫자만/모양만 선택된 상태인지 확인)
+            const wasComplete = !!(pfState.board[idx].r && pfState.board[idx].s);
+            pfState.board[idx][field] = val;
+            const c = pfState.board[idx];
+            const nowComplete = !!(c.r && c.s);
+            // justCompleted: 이 클릭으로 인해 비로소 완성된 경우만 자동 이동
+            // (숫자만 눌렀는데 이미 모양이 있던 경우 → 자동이동 ✅)
+            // (숫자만 눌렀는데 아직 모양이 없는 경우 → 자동이동 ❌)
+            // (이미 완성된 카드의 숫자를 바꾸는 경우 → 자동이동 ❌)
+            const justCompleted = nowComplete && !wasComplete;
+            const maxIdx = {flop:2, turn:3, river:4}[pfState.street] || 2;
+
+            _refreshBoardChip(); // 칩 즉시 반영
+
+            if (justCompleted) {
+                if (idx < maxIdx) {
+                    // 다음 빈 슬롯으로 자동 이동
+                    pfState._pickerCard = idx + 1;
+                    _renderPfsBody();
+                } else {
+                    // 마지막 카드까지 완성 → 잠깐 후 시트 자동 닫기
+                    pfState._pickerCard = null;
+                    _renderPfsBody();
+                    setTimeout(() => closePostflopSheet(), 280);
+                }
+            } else {
+                _renderPfsBody();
+            }
+        }
+        function _setPfsPot(val){pfState.pot=val;const inp=document.getElementById('pfs-pot-input');if(inp)inp.value=val;}
+        function _pfsSelectCard(idx){pfState._pickerCard=pfState._pickerCard===idx?null:idx;_renderPfsBody();}
+        function _refreshBoardChip(){
+            const btn=document.getElementById('pf-board'); if(!btn)return;
+            const SC=s=>['h','d'].includes(s)?'#F87171':'inherit';
+            const SY={s:'♠',h:'♥',d:'♦',c:'♣'};
+            const cnt={flop:3,turn:4,river:5}[pfState.street]||3;
+            btn.innerHTML=pfState.board.slice(0,cnt).map(c=>
+                c&&c.r?`<span style="color:${SC(c.s)};">${c.r}${SY[c.s]||''}</span>`:'?'
+            ).join(' ');
+        }
+        function _renderPfsBody(){
+            const body=document.getElementById('pfs-body'); if(!body)return;
+            const RK=['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+            const SU=[{k:'s',v:'♠'},{k:'h',v:'♥'},{k:'d',v:'♦'},{k:'c',v:'♣'}];
+            const sC=s=>['h','d'].includes(s)?'#F87171':'#D1D5DB';
+            const sy=s=>({s:'♠',h:'♥',d:'♦',c:'♣'})[s]||'?';
+            if(pfState._pickerType==='pot'){
+                const pr=[1.5,2,3,5,7,10,15,20];
+                body.innerHTML=`<span class="s-lbl">팟 사이즈 (BB)</span>
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                        <input type="number" id="pfs-pot-input" class="tr-input" value="${pfState.pot}" min="0.5" step="0.5" style="width:90px;" />
+                        <span style="color:#6B7280;font-size:13px;font-weight:600;">BB</span>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        ${pr.map(v=>`<button class="tr-opt${pfState.pot==v?' tr-on':''}" style="flex:none;padding:8px 12px;font-size:12px;" onclick="_setPfsPot(${v})">${v}BB</button>`).join('')}
+                    </div>`; return;
+            }
+            const aIdx=pfState._pickerCard;
+            const cnt={flop:3,turn:4,river:5}[pfState.street]||3;
+            const streetLbl=['플랍','턴','리버'][['flop','turn','river'].indexOf(pfState.street)]||'플랍';
+            const slots=Array.from({length:cnt},(_,i)=>{
+                const c=pfState.board[i]||{},has=c.r&&c.s,col=has?sC(c.s):'#374151';
+                return `<div class="tr-card${has?' c-filled':''}${i===aIdx?' c-active':''}" onclick="_pfsSelectCard(${i})">${has?`<span style="font-size:20px;font-weight:900;font-family:'SF Mono',monospace;color:${col};line-height:1;">${c.r}</span><span style="font-size:15px;color:${col};margin-top:2px;">${sy(c.s)}</span>`:`<span style="font-size:22px;color:#374151;font-weight:300;">＋</span>`}</div>`;
+            }).join('');
+            const aC=aIdx!==null?(pfState.board[aIdx]||{}):{};
+            // 현재 단계 안내 힌트
+            const selHint = aIdx!==null
+                ? (!aC.r && !aC.s ? '숫자 → 모양 순으로 선택하세요'
+                    : !aC.r        ? '숫자를 선택하세요'
+                    : !aC.s        ? '모양을 선택하면 다음 카드로 자동이동합니다'
+                    :                '완료! 다른 카드를 눌러 수정할 수 있어요')
+                : '카드 슬롯을 눌러 선택하세요';
+            const picker=aIdx!==null?`<div class="tr-picker">
+                <div style="font-size:10px;color:#6B7280;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">RANK (숫자)</div>
+                <div style="font-size:10px;color:#10B981;font-weight:600;margin-bottom:8px;">${selHint}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">${RK.map(r=>`<button class="tr-pk${aC.r===r?' pk-on':''}" onclick="_setPfsCard(${aIdx},'r','${r}')">${r}</button>`).join('')}</div>
+                <div style="font-size:10px;color:#6B7280;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">SUIT (모양)</div>
+                <div style="display:flex;gap:8px;">${SU.map(({k,v})=>`<button class="tr-pk${aC.s===k?' pk-on':''}" style="color:${sC(k)};font-size:18px;min-width:44px;" onclick="_setPfsCard(${aIdx},'s','${k}')">${v}</button>`).join('')}</div>
+            </div>`:'';
+            body.innerHTML=`<span class="s-lbl">보드 카드 (${cnt}장 — ${streetLbl})</span><div style="display:flex;gap:12px;margin-bottom:14px;">${slots}</div>${picker}`;
+        }
+
+        // ── Postflop panel (🚨 NO calculateGTO / NO renderUI) ────────────
+        function showPostflopPanel(c1,c2,suited){
+            const hand=c1+c2+(c1===c2?'':(suited?'s':'o'));
+            const d=_pfCellAnalysis(c1,c2,suited);
+            const pfp=document.getElementById('postflopPanel'); if(!pfp)return;
+            document.getElementById('pfpHand').textContent=hand;
+            const GC={monster:'#FB7185',strong:'#34D399',medium:'#EAB308',draw:'#60A5FA',air:'#9CA3AF'};
+            const GL={monster:'Monster',strong:'Strong Made',medium:'Mid Pair',draw:'Draw',air:'Bluff Catcher'};
+            const badge=document.getElementById('pfpBadge');
+            if(badge){badge.textContent=GL[d.str]||'Medium';badge.style.color=GC[d.str]||'#9CA3AF';badge.style.borderColor=GC[d.str]||'#9CA3AF';badge.style.background=(GC[d.str]||'#9CA3AF')+'1a';}
+            const sm={flop:'Flop',turn:'Turn',river:'River'};
+            const ctx=document.getElementById('pfpContext');
+            if(ctx)ctx.textContent=`${sm[pfState.street]} · ${pfState.pos.toUpperCase()} · vs ${pfState.villain==='check'?'Check':'Bet'}`;
+            [{barId:'pfpCheckBar',pctId:'pfpCheckPct',pct:d.check},{barId:'pfpBet33Bar',pctId:'pfpBet33Pct',pct:d.bet33},
+             {barId:'pfpBet75Bar',pctId:'pfpBet75Pct',pct:d.bet75},{barId:'pfpOBBar',pctId:'pfpOBPct',pct:d.overbet}
+            ].forEach(({barId,pctId,pct})=>{ const b=document.getElementById(barId),pe=document.getElementById(pctId); if(b)b.style.width=pct+'%'; if(pe)pe.textContent=pct+'%'; });
+            const acts=[
+                {l:'Check',              p:d.check},
+                {l:'Pot 33% Bet',        p:d.bet33},
+                {l:'Pot 75% Bet',        p:d.bet75},
+                {l:'Pot 150% Bet (OB)',  p:d.overbet}
+            ];
+            const top=acts.reduce((a,b)=>a.p>b.p?a:b);
+            const re=document.getElementById('pfpRec');
+            if(re) re.innerHTML=`${top.l} <span style="font-size:11px;color:#6B7280;font-weight:600;">(빈도: ${top.p}%)</span>`;
+            const GS={monster:'★★★★★',strong:'★★★★☆',medium:'★★★☆☆',draw:'★★★★☆',air:'★★★☆☆'};
+            const ge=document.getElementById('pfpGrade'); if(ge){ge.textContent=GS[d.str]||'★★★☆☆';ge.style.color=GC[d.str]||'#9CA3AF';}
+            const notes={monster:'Monster 핸드. Bet 75%+ 주력으로 밸류를 극대화하세요.',strong:'Top pair. 33% 사이징은 콜링 레인지를 최대한 넓혀 EV를 극대화합니다.',draw:'세미-블러프. 폴드 에퀴티와 에퀴티 실현을 동시에 노립니다.',medium:'마지널 핸드. 체크로 팟을 컨트롤하고 자연스러운 쇼다운을 노리세요.',air:'에퀴티 없음. 체크-폴드가 기본입니다.'};
+            const ne=document.getElementById('pfpNote'); if(ne)ne.textContent=notes[d.str]||notes.medium;
+            pfp.classList.add('pfp-open');
+        }
+        function closePostflopPanel(){ const p=document.getElementById('postflopPanel'); if(p)p.classList.remove('pfp-open'); }
+
+        // ── Matrix render (🚨 ISOLATED — no GTO engine calls) ────────────
+        function renderPostflopMatrix(){
+            const ct=document.getElementById('postflopMatrix'); if(!ct)return;
+            if(!ct.children.length){
+                const frag=document.createDocumentFragment();
+                for(let i=0;i<13;i++){
+                    for(let j=0;j<13;j++){
+                        let c1,c2,s,lbl,zone,lH;
+                        if(i===j){c1=c2=RANK_ORDER[i];s='o';lbl=c1+c2;zone='mcell-p';lH=`<span class="mcell-rank">${lbl}</span>`;}
+                        else if(i<j){c1=RANK_ORDER[i];c2=RANK_ORDER[j];s='s';lbl=c1+c2+'s';zone='mcell-s';lH=`<span class="mcell-rank">${c1}${c2}</span><span class="txt-s">s</span>`;}
+                        else{c1=RANK_ORDER[j];c2=RANK_ORDER[i];s='o';lbl=c1+c2+'o';zone='mcell-o';lH=`<span class="mcell-rank">${c1}${c2}</span><span class="txt-o">o</span>`;}
+                        const cell=document.createElement('div');
+                        cell.className=`mcell ${zone}`;
+                        cell.dataset.c1=c1;cell.dataset.c2=c2;cell.dataset.s=s;cell.dataset.l=lbl;
+                        const sp=document.createElement('span');sp.className='mcell-lbl';sp.innerHTML=lH;
+                        cell.appendChild(sp);
+                        cell.addEventListener('click',function(){
+                            ct.querySelectorAll('.mcell.sel').forEach(c=>c.classList.remove('sel'));
+                            this.classList.add('sel');
+                            showPostflopPanel(this.dataset.c1,this.dataset.c2,(this.dataset.c1!==this.dataset.c2)&&this.dataset.s==='s');
+                        });
+                        frag.appendChild(cell);
+                    }
+                }
+                ct.appendChild(frag);
+            }
+            ct.querySelectorAll('.mcell').forEach(cell=>{
+                cell.style.background=_pfCellBg(cell.dataset.c1,cell.dataset.c2,(cell.dataset.c1!==cell.dataset.c2)&&cell.dataset.s==='s');
+            });
+            ['ep','mp','co','btn','sb','bb'].forEach(k=>{ const el=document.getElementById('pf-hud-'+k.toUpperCase()); if(el)el.classList.toggle('hud-on',k===pfState.pos); });
+            updatePfHud(); // hero(초록) + villain(빨강) 듀얼 컬러 동기화
+            _updatePfSub();
+        }
+
 
         // ── 전역 상수 ────────────────────────────────────────────────────────
         const RANK_ORDER = "AKQJT98765432";
@@ -742,8 +1398,8 @@
         // ── Cell background color ──────────────────────────────────────────
         // ── Cell background: 비율 정확 게이지 바 (hard color stop, 하단=Raise → Call → 상단=Fold) ──
         function _cellBg(R, C, F) {
-            const RAISE = '#E11D48';
-            const CALL  = '#10B981';
+            const RAISE = '#FB7185';   // soft coral — 눈 피로 감소
+            const CALL  = '#34D399';   // muted emerald — 파스텔
             const FOLD  = '#0F1520';   // 폴드 = 거의 검정에 가까운 네이비
 
             // 순수 단색 최적화
@@ -970,7 +1626,11 @@
             const sLbl=stk<=15?'15↓':stk===20?'20':stk===25?'25':stk===30?'30':stk===40?'40':stk===60?'60':'100+';
             document.getElementById('chip_level').textContent=state.level==='low'?'🎯 데일리':'💀 몬스터';
             document.getElementById('chip_stack').textContent='💰 '+sLbl+'BB';
-            document.getElementById('chip_pos').textContent='👤 '+state.pos;
+            // HUD seat neon glow — active seat emits emerald light
+            ['EP','MP','CO','BTN','SB','BB'].forEach(p => {
+                const el = document.getElementById('hud-'+p);
+                if (el) el.classList.toggle('hud-on', state.pos === p);
+            });
             const fc=document.getElementById('chip_facing');
             if(state.facing==='none'){fc.textContent='✅ 언오픈 팟';fc.className='chip';}
             else if(state.facing==='raise'){fc.textContent='⚔️ 레이즈 나옴';fc.className='chip chip-warn';}
@@ -1038,6 +1698,345 @@
                 if (panel) panel.classList.remove('sht-full');
             };
         })();
+
+
+        // ================================================================
+        // GTO TRAINING MODULE  v1.0 MVP
+        // HandReviewPage · HandReviewWizard · HandReviewResult
+        // MockSolver — 추후 실제 엔진으로 교체 가능한 인터페이스
+        // ================================================================
+        ;(function () {
+        'use strict';
+
+        // ── Constants ────────────────────────────────────────────────
+        const RANKS      = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+        const SUITS      = [{k:'s',v:'♠'},{k:'h',v:'♥'},{k:'d',v:'♦'},{k:'c',v:'♣'}];
+        const POSITIONS  = ['EP','MP','CO','BTN','SB','BB'];
+        const STACKS     = ['15','20','25','30','40','60','100'];
+        const PRE_ACTS   = ['Fold','Call','Raise'];
+        const POST_ACTS  = ['Fold','Check','Call','Bet','Raise'];
+        const BET_PRE    = ['25%','33%','50%','67%','75%','100%','OB'];
+        const STEP_NAMES = ['PRE-FLOP','FLOP','TURN','RIVER'];
+
+        // ── State ────────────────────────────────────────────────────
+        const hr = {
+            step: 0,
+            activePicker: null,
+            preflop: { heroPos:'BTN', stack:'100', c1:{r:'A',s:'s'}, c2:{r:'K',s:'h'}, action:'Raise', betSize:'2.5' },
+            flop:    { b1:{r:'A',s:'s'}, b2:{r:'Q',s:'d'}, b3:{r:'7',s:'c'}, pot:'5.0', vAction:'Check', hAction:'Bet', betSize:'50%' },
+            turn:    { card:{r:'T',s:'h'}, pot:'9.0', vAction:'Check', hAction:'Bet', betSize:'67%' },
+            river:   { card:{r:'2',s:'c'}, pot:'18.0', vAction:'Check', hAction:'Bet', betSize:'100%' }
+        };
+
+        // ── MockSolver (인터페이스 분리 — 추후 실제 엔진으로 교체) ──
+        const MockSolver = {
+            analyze(d) {
+                return {
+                    preflop: this._preflop(d),
+                    flop:    this._post(d, 'flop'),
+                    turn:    this._post(d, 'turn'),
+                    river:   this._post(d, 'river')
+                };
+            },
+            _preflop(d) {
+                const { heroPos, c1, c2, action, betSize } = d.preflop;
+                const isPair  = c1.r === c2.r;
+                const isPrem  = isPair && ['A','K','Q'].includes(c1.r);
+                const isBway  = !isPair && ['A','K','Q','J','T'].includes(c1.r) && ['A','K','Q','J','T'].includes(c2.r);
+                const posBonus = { EP:0, MP:8, CO:16, BTN:28, SB:14, BB:5 };
+                const base     = isPrem ? 100 : isBway ? 85 : 55;
+                const rFreq    = Math.min(100, base + (posBonus[heroPos] || 0));
+                const gtoAct   = rFreq >= 60 ? 'Raise' : 'Fold';
+                const mix = [
+                    { action:'Raise', pct: rFreq },
+                    { action:'Fold',  pct: 100 - rFreq }
+                ].filter(m => m.pct > 0);
+                const userGood = action === 'Raise' && rFreq >= 50;
+                const grade    = userGood ? 'Excellent' : action === 'Fold' && rFreq <= 40 ? 'Good' : 'Mistake';
+                const evLoss   = { 'Excellent':0.00, 'Good':0.11, 'Mistake':0.46 }[grade];
+                return { userAction: action + (action==='Raise' ? ' '+betSize+'BB' : ''), recommended:'Raise '+rFreq+'%', mix, grade, evLoss };
+            },
+            _post(d, street) {
+                const s = d[street];
+                const { hAction, betSize } = s;
+                const isBet = ['Bet','Raise'].includes(hAction);
+                const bPct  = isBet ? (betSize==='OB' ? 140 : parseInt(betSize)||50) : 0;
+                let mix, rec, grade, evLoss;
+                if      (hAction === 'Fold')   { mix=[{action:'Fold',pct:12},{action:'Call',pct:75},{action:'Raise',pct:13}]; rec='Call'; grade='Mistake'; evLoss=0.43; }
+                else if (hAction === 'Check')  { mix=[{action:'Check',pct:52},{action:'Bet 33%',pct:14},{action:'Bet 50%',pct:26},{action:'Bet 75%',pct:8}]; rec='Check'; grade='Good'; evLoss=0.05; }
+                else if (hAction === 'Call')   { mix=[{action:'Fold',pct:8},{action:'Call',pct:74},{action:'Raise',pct:18}]; rec='Call'; grade='Excellent'; evLoss=0.02; }
+                else if (bPct <= 33)  { mix=[{action:'Check',pct:8},{action:'Bet 25%',pct:18},{action:'Bet 33%',pct:56},{action:'Bet 50%',pct:16},{action:'Overbet',pct:2}];  rec='Bet 33%';  grade='Excellent'; evLoss=0.01; }
+                else if (bPct <= 50)  { mix=[{action:'Check',pct:12},{action:'Bet 33%',pct:8},{action:'Bet 50%',pct:58},{action:'Bet 75%',pct:18},{action:'Overbet',pct:4}];  rec='Bet 50%';  grade='Excellent'; evLoss=0.02; }
+                else if (bPct <= 67)  { mix=[{action:'Check',pct:18},{action:'Bet 50%',pct:14},{action:'Bet 67%',pct:42},{action:'Bet 75%',pct:20},{action:'Overbet',pct:6}]; rec='Bet 67%';  grade='Good';      evLoss=0.06; }
+                else if (bPct <= 75)  { mix=[{action:'Check',pct:20},{action:'Bet 50%',pct:10},{action:'Bet 67%',pct:20},{action:'Bet 75%',pct:40},{action:'Overbet',pct:10}];rec='Bet 75%';  grade='Good';      evLoss=0.08; }
+                else if (bPct <= 100) { mix=[{action:'Check',pct:22},{action:'Bet 50%',pct:8},{action:'Bet 75%',pct:22},{action:'Bet 100%',pct:38},{action:'Overbet',pct:10}];rec='Bet 100%'; grade='Good';      evLoss=0.09; }
+                else                  { mix=[{action:'Check',pct:25},{action:'Bet 75%',pct:8},{action:'Bet 100%',pct:28},{action:'Overbet',pct:39}];                          rec='Overbet';  grade='Excellent'; evLoss=0.03; }
+                return { userAction: hAction+(isBet?' '+betSize:''), recommended:rec, mix, grade, evLoss };
+            }
+        };
+
+        // ── Card utilities ────────────────────────────────────────────
+        const SUIT_SYM = {s:'♠',h:'♥',d:'♦',c:'♣'};
+        function sCol(s) { return ['h','d'].includes(s) ? '#F87171' : '#D1D5DB'; }
+        function sym(s)  { return SUIT_SYM[s] || '?'; }
+
+        // ── HTML builders ─────────────────────────────────────────────
+        function optBtn(label, selected, onclick, agg) {
+            const on = label === selected;
+            const cls = on ? (agg ? 'tr-opt tr-agg' : 'tr-opt tr-on') : 'tr-opt';
+            return `<button class="${cls}" onclick="${onclick}">${label}</button>`;
+        }
+        function betPreset(val, selected, path) {
+            const on = val === selected;
+            return `<button class="tr-opt${on?' tr-agg':''}" style="flex:none;padding:8px 10px;font-size:11px;" onclick="HR.setP('${path}','${val}')">${val}</button>`;
+        }
+        function cardEl(id, c) {
+            const isAct = hr.activePicker === id;
+            const hasCd = c && c.r && c.s;
+            return `<div class="tr-card${hasCd?' c-filled':''}${isAct?' c-active':''}" onclick="HR.openPicker('${id}')">
+                ${hasCd
+                    ? `<span style="font-size:20px;font-weight:900;font-family:'SF Mono',monospace;color:${sCol(c.s)};line-height:1;">${c.r}</span><span style="font-size:15px;color:${sCol(c.s)};margin-top:2px;">${sym(c.s)}</span>`
+                    : `<span style="font-size:22px;color:#374151;font-weight:300;">＋</span>`
+                }
+            </div>`;
+        }
+        function pickerEl(id, c) {
+            const selR = c ? c.r : '', selS = c ? c.s : '';
+            return `<div class="tr-picker">
+                <div style="font-size:10px;color:#6B7280;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">RANK</div>
+                <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">
+                    ${RANKS.map(r => `<button class="tr-pk${r===selR?' pk-on':''}" onclick="HR.setCard('${id}','r','${r}')">${r}</button>`).join('')}
+                </div>
+                <div style="font-size:10px;color:#6B7280;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">SUIT</div>
+                <div style="display:flex;gap:8px;">
+                    ${SUITS.map(({k,v}) => `<button class="tr-pk${k===selS?' pk-on':''}" style="color:${sCol(k)};font-size:20px;min-width:44px;padding:8px;" onclick="HR.setCard('${id}','s','${k}')">${v}</button>`).join('')}
+                </div>
+            </div>`;
+        }
+        function cardGroup(slots) {
+            const active = slots.find(s => s.id === hr.activePicker);
+            return `<div>
+                <div style="display:flex;gap:10px;">${slots.map(({id,c}) => cardEl(id,c)).join('')}</div>
+                ${active ? pickerEl(active.id, active.c) : ''}
+            </div>`;
+        }
+        function potInput(path, val) {
+            return `<div style="display:flex;align-items:center;gap:8px;">
+                <input type="number" class="tr-input" value="${val}" min="0" step="0.5" oninput="HR.setP('${path}',this.value)" />
+                <span style="font-size:12px;color:#6B7280;font-weight:600;">BB</span>
+            </div>`;
+        }
+
+        // ── Step content renderers ───────────────────────────────────
+        function stepHTML(i) {
+            const { preflop:pf, flop:fl, turn:tn, river:rv } = hr;
+            const badge = s => `<div class="tr-badge ${s.toLowerCase().replace('-','')}">${s}</div>`;
+            const ig = (lbl, body) => `<div class="tr-ig"><span class="tr-sec-lbl">${lbl}</span>${body}</div>`;
+            const row = btns => `<div style="display:flex;gap:6px;">${btns}</div>`;
+
+            if (i === 0) {
+                const hasBet = pf.action === 'Raise';
+                return badge('PRE-FLOP') +
+                ig('Hero Position', row(POSITIONS.map(p => optBtn(p, pf.heroPos, `HR.setP('preflop.heroPos','${p}')`)  .join('')))) +
+
+                ig('Hero Position', row(POSITIONS.map(p => optBtn(p, pf.heroPos, `HR.setP('preflop.heroPos','${p}')`)).join(''))) +
+                ig('Effective Stack (BB)', `<div style="display:flex;flex-wrap:wrap;gap:6px;">${STACKS.map(s => {
+                    const lbl = s==='100'?'100+':s, on = pf.stack===s;
+                    return `<button class="tr-opt${on?' tr-on':''}" style="flex:none;padding:9px 12px;" onclick="HR.setP('preflop.stack','${s}')">${lbl}</button>`;
+                }).join('')}</div>`) +
+                ig('Hole Cards', cardGroup([{id:'pf.c1',c:pf.c1},{id:'pf.c2',c:pf.c2}])) +
+                ig('Preflop Action', row(PRE_ACTS.map(a => optBtn(a, pf.action, `HR.setP('preflop.action','${a}')`, a==='Raise')).join(''))) +
+                (hasBet ? ig('Raise Size', `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+                    ${['2.0','2.2','2.5','3.0','4.0'].map(v => `<button class="tr-opt${pf.betSize==v?' tr-agg':''}" style="flex:none;padding:8px 10px;font-size:11px;" onclick="HR.setP('preflop.betSize','${v}')">${v}BB</button>`).join('')}
+                    <input type="number" class="tr-input" value="${pf.betSize}" min="1" max="100" step="0.5" oninput="HR.setP('preflop.betSize',this.value)" style="width:72px;" />
+                </div>`) : '');
+            }
+            if (i === 1) {
+                const hasBet = ['Bet','Raise'].includes(fl.hAction);
+                return badge('FLOP') +
+                ig('Board (3 Cards)', cardGroup([{id:'fl.b1',c:fl.b1},{id:'fl.b2',c:fl.b2},{id:'fl.b3',c:fl.b3}])) +
+                ig('Pot Size', potInput('flop.pot', fl.pot)) +
+                ig('Villain Action', row(['Check','Bet','Raise'].map(a => optBtn(a, fl.vAction, `HR.setP('flop.vAction','${a}')`, a==='Raise')).join(''))) +
+                ig('Hero Action',    row(POST_ACTS.map(a => optBtn(a, fl.hAction, `HR.setP('flop.hAction','${a}')`, ['Bet','Raise'].includes(a))).join(''))) +
+                (hasBet ? ig('Bet Size', `<div style="display:flex;flex-wrap:wrap;gap:6px;">${BET_PRE.map(s => betPreset(s, fl.betSize, 'flop.betSize')).join('')}</div>`) : '');
+            }
+            if (i === 2) {
+                const hasBet = ['Bet','Raise'].includes(tn.hAction);
+                return badge('TURN') +
+                ig('Turn Card', cardGroup([{id:'tn.card',c:tn.card}])) +
+                ig('Pot Size', potInput('turn.pot', tn.pot)) +
+                ig('Villain Action', row(['Check','Bet','Raise'].map(a => optBtn(a, tn.vAction, `HR.setP('turn.vAction','${a}')`, a==='Raise')).join(''))) +
+                ig('Hero Action',    row(POST_ACTS.map(a => optBtn(a, tn.hAction, `HR.setP('turn.hAction','${a}')`, ['Bet','Raise'].includes(a))).join(''))) +
+                (hasBet ? ig('Bet Size', `<div style="display:flex;flex-wrap:wrap;gap:6px;">${BET_PRE.map(s => betPreset(s, tn.betSize, 'turn.betSize')).join('')}</div>`) : '');
+            }
+            if (i === 3) {
+                const hasBet = ['Bet','Raise'].includes(rv.hAction);
+                return badge('RIVER') +
+                ig('River Card', cardGroup([{id:'rv.card',c:rv.card}])) +
+                ig('Pot Size', potInput('river.pot', rv.pot)) +
+                ig('Villain Action', row(['Check','Bet','Raise'].map(a => optBtn(a, rv.vAction, `HR.setP('river.vAction','${a}')`, a==='Raise')).join(''))) +
+                ig('Hero Action',    row(POST_ACTS.map(a => optBtn(a, rv.hAction, `HR.setP('river.hAction','${a}')`, ['Bet','Raise'].includes(a))).join(''))) +
+                (hasBet ? ig('Bet Size', `<div style="display:flex;flex-wrap:wrap;gap:6px;">${BET_PRE.map(s => betPreset(s, rv.betSize, 'river.betSize')).join('')}</div>`) : '');
+            }
+            return '';
+        }
+
+        // ── Wizard update ─────────────────────────────────────────────
+        function wizardUpdate() {
+            const body = document.getElementById('tr-wbody'); if (!body) return;
+            body.innerHTML = stepHTML(hr.step);
+            const fill  = document.getElementById('tr-pfill');
+            const label = document.getElementById('tr-step-lbl');
+            const bb    = document.getElementById('tr-bbtn');
+            const nb    = document.getElementById('tr-nbtn');
+            if (fill)  fill.style.width = `${((hr.step + 1) / 4) * 100}%`;
+            if (label) label.textContent = `${STEP_NAMES[hr.step]}  ·  ${hr.step + 1} / 4`;
+            if (bb)    bb.textContent = hr.step === 0 ? '← Back' : '← ' + STEP_NAMES[hr.step - 1];
+            if (nb) {
+                const last = hr.step === 3;
+                nb.textContent = last ? 'Analyze →' : STEP_NAMES[hr.step + 1] + ' →';
+                nb.className   = 'tr-nav tr-nav-p';
+                nb.onclick     = last ? () => HR.analyze() : () => HR.next();
+            }
+            // Scroll picker into view after render
+            if (hr.activePicker) setTimeout(() => {
+                const pk = document.querySelector('.tr-picker');
+                if (pk) pk.scrollIntoView({ behavior:'smooth', block:'nearest' });
+            }, 60);
+        }
+
+        // ── Result rendering ──────────────────────────────────────────
+        const GRADE = {
+            'Excellent': { stars:'★★★★★', color:'#10B981', cls:'ex' },
+            'Good':      { stars:'★★★★☆', color:'#EAB308', cls:'gd' },
+            'Mistake':   { stars:'★★☆☆☆', color:'#EF4444', cls:'mk' }
+        };
+        function boardCardEl(c) {
+            if (!c || !c.r) return `<div class="tr-bc"><span style="color:#374151;font-size:10px;">?</span></div>`;
+            return `<div class="tr-bc"><span class="tr-bc-r" style="color:${sCol(c.s)};">${c.r}</span><span class="tr-bc-s" style="color:${sCol(c.s)};">${sym(c.s)}</span></div>`;
+        }
+        function mixBarsEl(mix, userAct) {
+            const ua = (userAct||'').toLowerCase();
+            return mix.map(m => {
+                const col   = m.action==='Check'?'#6B7280':m.action==='Fold'?'#374151':m.action==='Call'?'#10B981':'#E11D48';
+                const isYou = ua.includes(m.action.toLowerCase().split(' ')[0]);
+                return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+                    <span style="width:78px;font-size:11px;color:#9CA3AF;font-weight:600;flex-shrink:0;">${m.action}</span>
+                    <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">
+                        <div style="height:100%;width:${m.pct}%;background:${col};border-radius:99px;"></div>
+                    </div>
+                    <span style="width:30px;text-align:right;font-size:11px;font-weight:700;color:${isYou?'#F9FAFB':'#4B5563'};font-family:'SF Mono',monospace;">${m.pct}%</span>
+                    ${isYou?`<span style="font-size:9px;color:#60A5FA;flex-shrink:0;">you</span>`:'<span style="width:24px;"></span>'}
+                </div>`;
+            }).join('');
+        }
+        function resultCardEl(streetLabel, data, board, badgeCls) {
+            if (!data) return '';
+            const g = GRADE[data.grade] || GRADE['Good'];
+            return `<div class="tr-rc ${g.cls}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <div class="tr-badge ${badgeCls}" style="margin:0;">${streetLabel}</div>
+                    <div style="display:flex;align-items:center;gap:5px;">
+                        <span style="color:${g.color};font-size:13px;letter-spacing:1px;">${g.stars}</span>
+                        <span style="font-size:11px;font-weight:700;color:${g.color};">${data.grade}</span>
+                    </div>
+                </div>
+                ${board && board.length ? `<div style="margin-bottom:12px;">
+                    <div style="font-size:10px;color:#6B7280;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">BOARD</div>
+                    <div style="display:flex;gap:5px;">${board.map(boardCardEl).join('')}</div>
+                </div>` : ''}
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+                    <div>
+                        <div style="font-size:10px;color:#6B7280;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">YOUR ACTION</div>
+                        <div style="font-size:15px;font-weight:800;color:#F9FAFB;">${data.userAction}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10px;color:#6B7280;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">RECOMMENDED</div>
+                        <div style="font-size:13px;font-weight:800;color:${g.color};">${data.recommended}</div>
+                    </div>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <div style="font-size:10px;color:#6B7280;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">GTO STRATEGY</div>
+                    ${mixBarsEl(data.mix, data.userAction)}
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);">
+                    <span style="font-size:10px;color:#6B7280;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">EV LOSS</span>
+                    <span style="font-family:'SF Mono',monospace;font-size:12px;font-weight:700;color:${data.evLoss===0?'#10B981':data.evLoss<0.1?'#EAB308':'#EF4444'};">
+                        ${data.evLoss===0?'0.00 bb ✓':'-'+data.evLoss.toFixed(2)+' bb'}
+                    </span>
+                </div>
+            </div>`;
+        }
+
+        // ── View management ───────────────────────────────────────────
+        function showView(id) {
+            ['tr-page','tr-wizard','tr-result'].forEach(v => {
+                const el = document.getElementById(v);
+                if (el) el.style.display = (v === id) ? 'flex' : 'none';
+            });
+            const tab = document.getElementById('trainingTab');
+            if (tab) tab.scrollTop = 0;
+        }
+
+        // ── Card data map ─────────────────────────────────────────────
+        const CARD_MAP = () => ({
+            'pf.c1': hr.preflop.c1, 'pf.c2': hr.preflop.c2,
+            'fl.b1': hr.flop.b1, 'fl.b2': hr.flop.b2, 'fl.b3': hr.flop.b3,
+            'tn.card': hr.turn.card, 'rv.card': hr.river.card
+        });
+
+        // ── Public API ────────────────────────────────────────────────
+        window.HR = {
+            startReview() {
+                hr.step = 0; hr.activePicker = null;
+                showView('tr-wizard'); wizardUpdate();
+            },
+            goToPage() { showView('tr-page'); },
+            back() {
+                hr.activePicker = null;
+                if (hr.step > 0) { hr.step--; wizardUpdate(); } else showView('tr-page');
+            },
+            next() {
+                hr.activePicker = null;
+                if (hr.step < 3) { hr.step++; wizardUpdate(); }
+            },
+            analyze() {
+                hr.activePicker = null;
+                const res = MockSolver.analyze(hr);
+                const f = hr.flop, t = hr.turn, r = hr.river;
+                const fBoard = [f.b1, f.b2, f.b3];
+                const tBoard = [...fBoard, t.card];
+                const rBoard = [...tBoard, r.card];
+                const body = document.getElementById('tr-rbody');
+                if (body) body.innerHTML =
+                    resultCardEl('PRE-FLOP', res.preflop, [],     'preflop') +
+                    resultCardEl('FLOP',     res.flop,    fBoard, 'flop')    +
+                    resultCardEl('TURN',     res.turn,    tBoard, 'turn')    +
+                    resultCardEl('RIVER',    res.river,   rBoard, 'river');
+                showView('tr-result');
+            },
+            openPicker(id) {
+                hr.activePicker = (hr.activePicker === id) ? null : id;
+                wizardUpdate();
+            },
+            setCard(id, field, val) {
+                const card = CARD_MAP()[id];
+                if (!card) return;
+                card[field] = val;
+                if (card.r && card.s) hr.activePicker = null; // auto-close when complete
+                wizardUpdate();
+            },
+            setP(path, value) { // setPref via dot-notation
+                const parts = path.split('.');
+                let obj = hr;
+                for (let i = 0; i < parts.length - 1; i++) obj = obj[parts[i]];
+                obj[parts[parts.length - 1]] = value;
+                if (!path.startsWith('preflop.betSize') && !path.endsWith('.pot')) hr.activePicker = null;
+                wizardUpdate();
+            }
+        };
+
+        })(); // end GTO Training Module
 
     </script>
 </body>
