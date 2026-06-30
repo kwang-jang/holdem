@@ -193,7 +193,7 @@
         #postflopSheet { position:fixed;inset:0;z-index:55;opacity:0;pointer-events:none;transition:opacity .25s ease; }
         #postflopSheet.pfs-open { opacity:1;pointer-events:all; }
         #pfs-backdrop { position:absolute;inset:0;background:rgba(0,0,0,.74); }
-        #pfs-panel { position:absolute;bottom:0;left:0;right:0;max-width:448px;margin:0 auto;background:#13161A;border-top:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:0 16px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:78vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px); }
+        #pfs-panel { position:absolute;bottom:0;left:0;right:0;max-width:448px;margin:0 auto;background:rgba(19,22,26,.97);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border-top:1px solid rgba(255,255,255,.06);border-radius:22px 22px 0 0;padding:0 16px;transform:translateY(100%);transition:transform .34s cubic-bezier(.32,.72,0,1);max-height:78vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px);box-shadow:0 -20px 60px rgba(0,0,0,.5),0 -2px 12px rgba(0,0,0,.3); }
         #postflopSheet.pfs-open #pfs-panel { transform:translateY(0); }
         /* ── Premium Training Dashboard — Flat Glass ──────────────────── */
         /* 유리 대시보드 패널 */
@@ -224,6 +224,11 @@
         .pf-vbtn { display:inline-flex;align-items:center;gap:3px;padding:5px 9px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:500;font-family:inherit;color:rgba(255,255,255,.28);background:none;-webkit-tap-highlight-color:transparent;transition:all .15s;white-space:nowrap;letter-spacing:-0.025em; }
         .pf-vbtn:active { opacity:.6; }
         .pf-v-act { color:rgba(255,255,255,.82)!important;background:rgba(255,255,255,.06)!important;font-weight:700!important; }
+
+        /* 상대 베팅 사이즈 픽커 — 미니멀 칩, 선택 시 옅은 붉은색 강조 */
+        .pf-vsize-chip { padding:4px 8px;border-radius:6px;border:none;background:none;cursor:pointer;font-family:inherit;font-size:10px;font-weight:600;color:rgba(255,255,255,.28);letter-spacing:-0.02em;-webkit-tap-highlight-color:transparent;transition:all .15s; }
+        .pf-vsize-chip:active { opacity:.6; }
+        .pf-vsize-chip.pf-vs-on { background:rgba(239,68,68,.18);color:#FCA5A5;font-weight:800; }
         /* ── 타이포그래피 계층: 데이터 강조 / 라벨 뮤트 ─────────────── */
         /* 퍼센트 수치 — font-black, 고정폭 */
         #pRPct,#pCPct,#pFPct,#pEV,
@@ -425,7 +430,7 @@
 <!-- ║  POSTFLOP RESULT PANEL (독립 패널)      ║ -->
 <!-- ╚══════════════════════════════════════════╝ -->
 <div id="postflopPanel">
-    <div style="background:rgba(10,12,16,.92);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:16px 16px 14px;box-shadow:0 -8px 32px rgba(0,0,0,.55),0 4px 24px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);">
+    <div style="background:rgba(11,13,17,.94);backdrop-filter:blur(30px) saturate(190%);-webkit-backdrop-filter:blur(30px) saturate(190%);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:16px 16px 14px;box-shadow:0 -10px 40px rgba(0,0,0,.45),0 6px 28px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05);">
         <!-- Row 1: Hand + Context badge + Close -->
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
             <div style="flex:1;min-width:0;">
@@ -441,6 +446,14 @@
         <!-- Row 2: Segmented action bars -->
         <div style="margin-bottom:12px;">
             <div style="font-size:9px;color:#4B5563;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:9px;">GTO ACTION MIX</div>
+            <!-- Fold -->
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <span style="width:148px;font-size:10px;color:#9CA3AF;font-weight:600;flex-shrink:0;letter-spacing:.02em;">Fold</span>
+                <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">
+                    <div id="pfpFoldBar" style="height:100%;width:0%;background:#64748B;border-radius:99px;transition:width .45s ease;"></div>
+                </div>
+                <span id="pfpFoldPct" style="width:34px;text-align:right;font-size:12px;font-weight:800;color:#64748B;font-variant-numeric:tabular-nums;">0%</span>
+            </div>
             <!-- Check -->
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
                 <span style="width:148px;font-size:10px;color:#9CA3AF;font-weight:600;flex-shrink:0;letter-spacing:.02em;">Check</span>
@@ -466,12 +479,20 @@
                 <span id="pfpBet75Pct" style="width:34px;text-align:right;font-size:12px;font-weight:800;color:#E11D48;font-variant-numeric:tabular-nums;">0%</span>
             </div>
             <!-- Pot 150% Bet (Overbet) -->
-            <div style="display:flex;align-items:center;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
                 <span style="width:148px;font-size:10px;color:#9CA3AF;font-weight:600;flex-shrink:0;letter-spacing:.02em;">Pot 150% Bet (Overbet)</span>
                 <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">
                     <div id="pfpOBBar" style="height:100%;width:0%;background:#A855F7;border-radius:99px;transition:width .45s ease;"></div>
                 </div>
                 <span id="pfpOBPct" style="width:34px;text-align:right;font-size:12px;font-weight:800;color:#A855F7;font-variant-numeric:tabular-nums;">0%</span>
+            </div>
+            <!-- All-in -->
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="width:148px;font-size:10px;color:#9CA3AF;font-weight:600;flex-shrink:0;letter-spacing:.02em;">All-in</span>
+                <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">
+                    <div id="pfpAllinBar" style="height:100%;width:0%;background:#C084FC;border-radius:99px;transition:width .45s ease;"></div>
+                </div>
+                <span id="pfpAllinPct" style="width:34px;text-align:right;font-size:12px;font-weight:800;color:#C084FC;font-variant-numeric:tabular-nums;">0%</span>
             </div>
         </div>
 
@@ -649,6 +670,14 @@
                 <!-- 상대 액션 미니멀 토글 -->
                 <button class="pf-vbtn pf-v-act" id="pf-vcheck" onclick="setPfVillain('check')">👿 체크</button>
                 <button class="pf-vbtn"           id="pf-vbet"   onclick="setPfVillain('bet')">👿 베팅</button>
+                <!-- 상대 베팅 사이즈 픽커 (villain='bet'일 때만 표시) -->
+                <span id="pf-vsize-wrap" style="display:none;align-items:center;gap:4px;">
+                    <span style="width:1px;height:14px;background:rgba(255,255,255,.08);flex-shrink:0;margin:0 2px;"></span>
+                    <button class="pf-vsize-chip" id="pf-vs-33"    onclick="setPfVillainSize('33')">33%</button>
+                    <button class="pf-vsize-chip" id="pf-vs-75"    onclick="setPfVillainSize('75')">75%</button>
+                    <button class="pf-vsize-chip" id="pf-vs-ob"    onclick="setPfVillainSize('ob')">OB</button>
+                    <button class="pf-vsize-chip" id="pf-vs-allin" onclick="setPfVillainSize('allin')">All-in</button>
+                </span>
             </div>
             <!-- Sub: HUD 포지션 정보 -->
             <div id="pfSub" style="font-size:10px;color:#374151;margin-top:5px;min-height:14px;"></div>
@@ -761,6 +790,7 @@
         // ================================================================
         const pfState = {
             street: 'flop', villain: 'check',
+            villainSize: '75',  // 상대 베팅 사이즈: '33'|'75'|'ob'|'allin' (villain='bet'일 때만 유효)
             pos: 'oop',         // analysis OOP/IP (used by _pfCellAnalysis)
             heroPos: 'btn',     // HUD hero seat (ep|mp|co|btn|sb|bb)
             villainPos: 'bb',   // HUD villain seat
@@ -769,30 +799,121 @@
             pot: 5.0, _pickerType: null, _pickerCard: null
         };
 
+        // ════════════════════════════════════════════════════════════════
+        // 🎲 결정론적 노이즈 생성기 — 동일 입력 → 동일 출력 (실제 솔버처럼
+        // 매 렌더마다 정확히 같은 소수점이 나오도록 핸드+상태를 시드로 해싱)
+        // ════════════════════════════════════════════════════════════════
+        function _pfNoise(seed) {
+            let h = 0;
+            for (let i = 0; i < seed.length; i++) {
+                h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+            }
+            // 0.0 ~ 1.0 의사난수 (xorshift 스타일 믹싱)
+            h ^= h << 13; h >>>= 0;
+            h ^= h >> 17;
+            h ^= h << 5;  h >>>= 0;
+            return (h % 10000) / 10000;
+        }
+
         function _pfCellAnalysis(c1, c2, suited) {
             const isPair = c1 === c2;
             const rIdx   = RANK_ORDER.indexOf(c1);
             const r2Idx  = RANK_ORDER.indexOf(c2);
             const diff   = Math.abs(rIdx - r2Idx);
-            let str;
-            if (isPair && rIdx <= 1)              str = 'monster';
-            else if (isPair && rIdx === 2)         str = 'monster';
-            else if (isPair && rIdx === 5)         str = 'monster';
-            else if (c1==='A' && c2==='Q')         str = 'monster';
-            else if (c1==='A')                     str = 'strong';
-            else if (isPair && rIdx <= 4)          str = 'medium';
-            else if (c1==='Q')                     str = 'medium';
-            else if (suited && diff<=2 && rIdx>=3 && rIdx<=9) str='draw';
-            else if (suited && rIdx<=3)            str = 'draw';
-            else                                   str = 'air';
+
+            // ════════════════════════════════════════════════════════════
+            // 📡 [지시사항 1] 실시간 보드 텍스처(Board Texture) 스캔
+            // ════════════════════════════════════════════════════════════
+            const streetCnt = {flop:3, turn:4, river:5}[pfState.street] || 3;
+            const liveBoard = (pfState.board || []).slice(0, streetCnt).filter(c => c && c.r && c.s);
+
+            // 보드 카드를 인덱스(0=A 최강)로 정렬해 순위/구조 파악
+            const boardRIdx  = liveBoard.map(c => RANK_ORDER.indexOf(c.r)).sort((a,b) => a-b);
+            const boardHighIdx = boardRIdx.length ? boardRIdx[0] : 0;           // 보드 최고카드 인덱스(작을수록 강함)
+            const boardSuits = liveBoard.map(c => c.s);
+            const suitCounts = boardSuits.reduce((m,s) => (m[s]=(m[s]||0)+1, m), {});
+            const maxSuitCount = Object.values(suitCounts).length ? Math.max(...Object.values(suitCounts)) : 0;
+
+            // ── 보드 텍스처 분류: Wet(젖음) vs Dry(마름) ───────────────
+            const boardFlushy   = maxSuitCount >= 3;                              // 보드에 동일슈트 3장+ → 플러시 완성 가능
+            // 보드 카드들이 서로 촘촘히 뭉쳐있는지(스트레이트 텍스처)로 판정.
+            // 인접쌍 최소갭이 아니라 "전체 스프레드"로 봐야 A-Q-7처럼 갭 큰 보드를 DRY로 정확히 분류함.
+            let boardConnected = false;
+            if (boardRIdx.length >= 3) {
+                const spread = boardRIdx[boardRIdx.length-1] - boardRIdx[0];
+                boardConnected = spread <= 4; // 3장 이상이 5칸 이내에 몰려있으면 connected
+            } else if (boardRIdx.length === 2) {
+                boardConnected = (boardRIdx[1]-boardRIdx[0]) <= 2;
+            }
+            const isWetBoard  = boardFlushy || boardConnected || (maxSuitCount===2 && boardRIdx.length<=3);
+            const isDryBoard  = !isWetBoard;
+
+            // ════════════════════════════════════════════════════════════
+            // 🔬 [지시사항 1] 홀카드 + 보드 결합 — 진짜 핸드 강도 평가기
+            // ════════════════════════════════════════════════════════════
+            let str = 'air';
+            let madeRank = 0; // 0=air 1=draw 2=mid 3=2pair 4=set+ (내부 비교용)
+
+            if (boardRIdx.length === 0) {
+                // 보드 카드가 아직 없는 극초기 상태(방어적 fallback) — 홀카드 단독 강도만
+                if (isPair && rIdx <= 2) str = 'monster';
+                else if (isPair) str = 'medium';
+                else if (c1==='A') str = 'strong';
+                else str = 'air';
+            } else if (isPair) {
+                // ── 포켓 페어: 셋 완성 여부 + 보드 대비 오버/언더페어 판정 ──
+                const tripsHit = boardRIdx.includes(rIdx); // 보드에 같은 랭크 → 셋(Set)
+                if (tripsHit) {
+                    str = 'monster'; madeRank = 4; // Set
+                } else if (rIdx < boardHighIdx) {
+                    str = 'monster'; madeRank = 3; // 오버페어(보드 최고카드보다 내 페어가 더 강함)
+                } else {
+                    // 보드에 내 페어보다 높은 카드 존재 → Medium으로 강등 (지시사항 1 예시: KK인데 보드에 A)
+                    str = 'medium'; madeRank = 1;
+                }
+            } else {
+                // ── 비페어 핸드: 보드와 매칭되는 페어/투페어 판정 ──────
+                const hit1 = boardRIdx.includes(rIdx);
+                const hit2 = boardRIdx.includes(r2Idx);
+                if (hit1 && hit2) {
+                    str = 'monster'; madeRank = 3; // 투페어
+                } else if (hit1 || hit2) {
+                    const hitIdx = hit1 ? rIdx : r2Idx;
+                    if (hitIdx <= boardHighIdx) { str = 'strong'; madeRank = 2; }  // 탑페어(보드 최고카드와 매칭)
+                    else                         { str = 'medium'; madeRank = 1; } // 보드 하위 카드와 매칭 → 미들/하위페어
+                } else {
+                    // ── 매칭 없음 → 드로우 가능성 평가 ──────────────────
+                    const fdPossible  = suited && (suitCounts[c1 === c1 ? boardSuits[0] : ''] !== undefined || true)
+                                        && liveBoard.some(bc => bc.s === (suited ? c1 : '')); // placeholder, 아래서 정밀판정
+                    // 정밀 플러시드로우 판정: 내 슈트와 보드 동일슈트 합이 4장(나+보드)
+                    let myFlushSuit = null;
+                    if (suited) {
+                        // suited=true면 c1,c2 같은 슈트로 가정된 표기이므로, 보드의 최다슈트와 일치 여부로 FD 근사
+                        const dominantSuit = Object.keys(suitCounts).reduce((a,s)=> suitCounts[s]>(suitCounts[a]||0)?s:a, null);
+                        if (dominantSuit && suitCounts[dominantSuit] === 2) myFlushSuit = dominantSuit; // 보드 2장+나 2장=4장 FD
+                    }
+                    const oesd = boardConnected && diff <= 4 && rIdx >= 2 && r2Idx <= 10; // 거친 OESD 근사(연결보드+근접 홀카드)
+                    if (myFlushSuit || oesd) {
+                        str = 'draw'; madeRank = 1.5;
+                    } else if (rIdx <= 1 || r2Idx <= 1) {
+                        str = 'air'; madeRank = 0.3; // 하이카드만 (오버카드, 백도어 약간 가능)
+                    } else {
+                        str = 'air'; madeRank = 0;
+                    }
+                }
+            }
+
+            // ── 기본 빈도 (지점 0: 5BB 팟, 체크, OOP 기준선) ──────────
             const bases = {
-                monster: { check:5,  bet33:18, bet75:52, ob:25, fold:0  },
-                strong:  { check:22, bet33:46, bet75:27, ob:5,  fold:0  },
-                medium:  { check:50, bet33:35, bet75:12, ob:3,  fold:0  },
-                draw:    { check:38, bet33:40, bet75:18, ob:4,  fold:0  },
-                air:     { check:68, bet33:20, bet75:10, ob:2,  fold:0  },
+                monster: { check:5,  bet33:18, bet75:52, ob:25, allin:0, fold:0 },
+                strong:  { check:22, bet33:46, bet75:27, ob:5,  allin:0, fold:0 },
+                medium:  { check:50, bet33:35, bet75:12, ob:3,  allin:0, fold:0 },
+                draw:    { check:38, bet33:40, bet75:18, ob:4,  allin:0, fold:0 },
+                air:     { check:68, bet33:20, bet75:10, ob:2,  allin:0, fold:0 },
             };
             let b = { ...bases[str] };
+
+            // ── 스트리트 진행 → 폴라라이징 심화 ────────────────────────
             if (pfState.street === 'turn') {
                 b.check = Math.max(0, b.check - 12); b.bet33 = Math.max(0, b.bet33 - 4);
                 b.bet75 += 12; b.ob += 4;
@@ -801,33 +922,221 @@
                 b.bet75 += 18; b.ob += 10;
                 if (str === 'air') { b.check=82; b.bet33=8; b.bet75=8; b.ob=2; }
             }
-            if (pfState.villain === 'bet') {
-                const excess = b.bet33 * 0.8;
-                b.check = b.check * 0.45; b.bet33 = Math.max(0, b.bet33 * 0.2);
-                b.bet75 = b.bet75 * 1.35; b.ob += excess * 0.25;
-                b.fold  = Math.max(0, 100 - b.check - b.bet33 - b.bet75 - b.ob);
+
+            // ════════════════════════════════════════════════════════════
+            // 🎯 [지시사항 2] Wet/Dry 보드 텍스처에 따른 유기적 믹싱
+            // ════════════════════════════════════════════════════════════
+            // ── 보드가 젖어있을 때(Draw heavy): 강한 메이드도 무지성 오버벳 자제, Call 믹싱 ──
+            if (isWetBoard && madeRank >= 3) {
+                const overbetTrim = b.ob * 0.30; // 오버벳 일부를 콜/체크 영역으로 환원
+                b.ob    = Math.max(0, b.ob - overbetTrim);
+                b.check += overbetTrim * 0.4;
+                b.bet75 += overbetTrim * 0.6; // 팟컨트롤형 강벳으로 흡수 (블로커 겸 방어)
             }
+            // ── 보드가 마르고(Dry) 리버일 때: Monster/Air 완전 폴라라이징 ──
+            const isDryRiver = isDryBoard && pfState.street === 'river';
+            if (isDryRiver) {
+                if (str === 'monster') {
+                    const polarShift = (b.bet75 + b.check) * 0.32;
+                    b.check = Math.max(0, b.check - polarShift * 0.5);
+                    b.bet75 = Math.max(0, b.bet75 - polarShift * 0.5);
+                    b.ob    += polarShift * 0.65;
+                    b.allin += polarShift * 0.35;
+                } else if (str === 'air') {
+                    const bluffShift = b.check * 0.22;
+                    b.check = Math.max(0, b.check - bluffShift);
+                    b.ob    += bluffShift * 0.7;
+                    b.allin += bluffShift * 0.3;
+                }
+            }
+
+            // ════════════════════════════════════════════════════════════
+            // 🎯 SPR(Stack-to-Pot Ratio) 실시간 계산 — 유효스택 100BB 고정
+            // ════════════════════════════════════════════════════════════
+            const EFF_STACK = 100;
+            const pot = Math.max(0.5, pfState.pot || 5);
+            const spr = EFF_STACK / pot;
+
+            if (pot < 5) {
+                const lowPotBoost = Math.min(1, (5 - pot) / 4);
+                const shiftFromBig = (b.bet75 + b.ob) * 0.35 * lowPotBoost;
+                b.check += shiftFromBig * 0.55;
+                b.bet33 += shiftFromBig * 0.45;
+                b.bet75 = Math.max(0, b.bet75 - shiftFromBig * 0.7);
+                b.ob    = Math.max(0, b.ob    - shiftFromBig * 0.3);
+            }
+
+            const sprFactor = pot > 5 ? Math.pow((pot - 5) / 10, 1.35) : 0;
+            if (sprFactor > 0) {
+                const obGain    = Math.min(b.bet75 * 0.55, sprFactor * 14) * (str==='air'?0.3:1);
+                const sprMultiplier = pot >= 15 ? 1 + Math.pow(sprFactor, 1.6) * 0.45 : 1;
+                const allinGain = sprFactor * sprFactor * 3.2 * sprMultiplier
+                                 * (['monster','strong'].includes(str) ? 1.4 : str==='air' ? 0.15 : 0.6);
+                b.bet75 = Math.max(0, b.bet75 - obGain * 0.7);
+                b.bet33 = Math.max(0, b.bet33 - obGain * 0.3);
+                b.ob    += obGain * sprMultiplier;
+                b.allin += allinGain;
+                if (pot >= 15 && ['medium','draw'].includes(str)) {
+                    const shrink = Math.min(b.check * 0.4, sprFactor * 6);
+                    b.check = Math.max(0, b.check - shrink);
+                    b.fold  = (b.fold||0) + shrink * 0.6;
+                }
+            }
+
+            // ════════════════════════════════════════════════════════════
+            // 🎯 Villain Action 레인지 완전 분리 (Polarization) + MDF 연산
+            // ════════════════════════════════════════════════════════════
+            if (pfState.villain === 'bet') {
+                // ── [지시사항 2] 베팅 사이즈별 MDF(최소 방어 빈도) 가중치 ──
+                // 팟 오즈 = betSize / (pot + betSize + betSize) 근사 → 사이즈가 작을수록 MDF(방어 빈도) 요구치가 낮아져 콜/레이즈 여유가 생김
+                const vSize = pfState.villainSize || '75';
+                // mdfLoosen: 1보다 크면 방어범위 확대(폴드↓), 1보다 작으면 방어범위 축소(폴드↑)
+                // mdfForceFold: OB/All-in처럼 팟오즈가 최악일 때, 넛이 아니면 즉시 폴드로 강제하는 스위치
+                const MDF_TABLE = {
+                    '33':    { mdfLoosen: 1.55, mdfForceFold: false }, // 33% 벳: 팟오즈 좋음 → call/raise 빈도↑
+                    '75':    { mdfLoosen: 1.00, mdfForceFold: false }, // 기준선
+                    'ob':    { mdfLoosen: 0.35, mdfForceFold: true  }, // 오버벳: 팟오즈 최악 → 넛 아니면 폴드
+                    'allin': { mdfLoosen: 0.18, mdfForceFold: true  }, // 올인: 팟오즈 극악 → 넛 아니면 폴드 100%
+                };
+                const mdf = MDF_TABLE[vSize] || MDF_TABLE['75'];
+
+                if (str === 'air') {
+                    // OB/All-in 벳에는 Air 핸드는 즉시 100% Fold 강제 (블러프-레이즈조차 봉인)
+                    if (mdf.mdfForceFold) {
+                        b = { check:0, bet33:0, bet75:0, ob:0, allin:0, fold: 100 };
+                    } else {
+                        const bluffCap = 20 * mdf.mdfLoosen;
+                        const bluffRaise = Math.min(bluffCap, b.bet33 * 0.15 * (spr > 15 ? 1.3 : 0.6) * mdf.mdfLoosen);
+                        b = { check:0, bet33:0, bet75:0, ob:bluffRaise*0.7, allin:bluffRaise*0.3, fold: 100 - bluffRaise };
+                    }
+                } else if (str === 'medium') {
+                    // OB/All-in 벳: Medium도 넛이 아니므로 즉시 폴드 강제
+                    if (mdf.mdfForceFold) {
+                        b = { check:0, bet33:0, bet75:0, ob:0, allin:0, fold: 100 };
+                    } else {
+                        // 캡 상한선도 mdfLoosen에 비례시켜야 33%/75% 차등이 실제로 드러남
+                        const callCap = 20 * mdf.mdfLoosen;
+                        const callRate = Math.min(callCap, (b.check * 0.4 + b.bet33 * 0.08) * mdf.mdfLoosen);
+                        b = { check:callRate, bet33:0, bet75:0, ob:0, allin:0, fold: 100 - callRate };
+                    }
+                } else if (str === 'draw') {
+                    if (mdf.mdfForceFold) {
+                        // 드로우도 OB/All-in 앞에서는 팟오즈가 맞지 않아 대부분 폴드 (역드로우 콜만 미량)
+                        const desperateCall = vSize === 'ob' ? 6 : 2;
+                        b = { check:0, bet33:0, bet75:0, ob:0, allin:0, fold: 100 - desperateCall };
+                        b.check = desperateCall;
+                    } else {
+                        const callRate  = b.check * 0.5 * mdf.mdfLoosen;
+                        const raiseRate = (b.bet33 + b.bet75) * 0.22;
+                        const obRate    = b.ob * 0.6;
+                        b = { check:callRate, bet33:0, bet75:raiseRate*0.6, ob:obRate+raiseRate*0.4, allin:b.allin,
+                              fold: Math.max(0, 100 - callRate - raiseRate - obRate - b.allin) };
+                    }
+                } else {
+                    // 넛(Nut)급 — 베팅 사이즈와 무관하게 Call/Raise 응수. 33%는 팟오즈가 좋아 콜 비중↑, OB/All-in은 즉시 콜다운/올인콜
+                    const excess = b.bet33 * 0.85;
+                    const wetGuard = isWetBoard ? 0.12 : 0;
+                    let callRate  = b.check * (0.30 + wetGuard);
+                    if (vSize === '33') callRate *= 1.6;            // 33% 벳: 팟오즈 우수 → 콜 비중 대폭 증가(슬로우플레이)
+                    if (mdf.mdfForceFold) callRate *= 1.35;          // OB/All-in: 넛이면 망설임 없이 콜다운/올인콜
+                    b.bet33  = Math.max(0, b.bet33 * 0.10);
+                    b.bet75  = b.bet75 * 1.20 + excess * 0.25;
+                    b.ob    += excess * (0.45 - wetGuard);
+                    b.allin += excess * 0.30 + (str==='monster' ? sprFactor * 5.5 + (spr<10?6:0) : 0)
+                             + (vSize==='allin' ? 8 : 0); // 상대가 올인이면 내 올인콜(레이즈로 표시되는 allin) 비중도 가산
+                    b.check  = callRate;
+                    b.fold   = Math.max(0, 100 - b.check - b.bet33 - b.bet75 - b.ob - b.allin);
+                }
+            } else {
+                b.fold = 0;
+                if (str === 'medium' || str === 'draw') {
+                    const checkBoost = (b.bet33 + b.bet75) * 0.18;
+                    b.check += checkBoost;
+                    b.bet33  = Math.max(0, b.bet33 - checkBoost * 0.55);
+                    b.bet75  = Math.max(0, b.bet75 - checkBoost * 0.45);
+                }
+            }
+
+            // ── 포지션 보정: IP는 약간 더 공격적 ──────────────────────
             if (['ip','co','btn'].includes(pfState.pos)) {
                 b.check = Math.max(0, b.check - 6); b.bet33 = b.bet33 * 1.12;
             }
-            const sum = b.check + b.bet33 + b.bet75 + b.ob + (b.fold || 0);
+
+            // ── 정규화 (총합 100%) ──────────────────────────────────────
+            const sum = b.check + b.bet33 + b.bet75 + b.ob + (b.allin||0) + (b.fold || 0);
             const sc  = sum > 0 ? 100 / sum : 1;
-            return { check:Math.round(b.check*sc), bet33:Math.round(b.bet33*sc),
-                     bet75:Math.round(b.bet75*sc), overbet:Math.round(b.ob*sc),
-                     fold:Math.round((b.fold||0)*sc), str };
+            let raw = {
+                check:   b.check   * sc,
+                bet33:   b.bet33   * sc,
+                bet75:   b.bet75   * sc,
+                overbet: b.ob      * sc,
+                allin:   (b.allin||0) * sc,
+                fold:    (b.fold||0)  * sc,
+            };
+
+            // ════════════════════════════════════════════════════════════
+            // 🔬 [지시사항 3] 보드 인지형 마이크로 노이즈 — 핸드+보드마다 고유값
+            // 홀카드 인덱스 + 보드 최고카드 인덱스를 시드에 결합해
+            // 31.7%, 68.3% 처럼 매번 다른 자연스러운 솔버 근사치 생성
+            // (🚨 _pfNoise 함수 자체는 1줄도 수정하지 않음 — 시드 조합만 정교화)
+            // ════════════════════════════════════════════════════════════
+            const seed = `${c1}${c2}${suited?1:0}|${rIdx}.${r2Idx}|${pfState.street}|${pfState.villain}|`
+                       + `${pfState.villainSize||'na'}|${pot.toFixed(1)}|${pfState.pos}|brd:${boardHighIdx}.${liveBoard.length}.${maxSuitCount}.${isWetBoard?1:0}`;
+            const keys = ['check','bet33','bet75','overbet','allin','fold'];
+            keys.forEach((k, i) => {
+                if (raw[k] <= 0) return;
+                const n = _pfNoise(seed + k) - 0.5; // -0.5 ~ +0.5
+                raw[k] = Math.max(0, raw[k] + n * 1.2); // ±0.6%p 노이즈
+            });
+            let newSum = keys.reduce((s,k) => s + raw[k], 0);
+            if (newSum > 0) {
+                const diffAmt = 100 - newSum;
+                const dominant = keys.reduce((a,k) => raw[k] > raw[a] ? k : a, keys[0]);
+                raw[dominant] = Math.max(0, raw[dominant] + diffAmt);
+            }
+            const out = {};
+            keys.forEach(k => { out[k] = Math.round(raw[k] * 10) / 10; });
+
+            return {
+                check:   out.check,
+                bet33:   out.bet33,
+                bet75:   out.bet75,
+                overbet: out.overbet,
+                allin:   out.allin,
+                fold:    out.fold,
+                spr:     Math.round(spr * 10) / 10,
+                str,
+                wet:     isWetBoard,        // 패널 등에서 보드텍스처 노출용(선택)
+                madeRank: madeRank          // 디버깅/확장용 내부 강도값
+            };
         }
 
+        // ════════════════════════════════════════════════════════════════
+        // 🎨 톤온톤 색상 변수 — _pfCellBg ↔ #postflopPanel 게이지 바 100% 동기화
+        // ════════════════════════════════════════════════════════════════
+        const PF_COLOR = {
+            fold:    '#0D1117',  // 짙은 다크 네이비 — 눈에 띄지 않음
+            check:   '#34D399',  // 파스텔 그린 — 안정적
+            bet33:   '#FB7185',  // 옅은 코랄 — Pot 33% Bet
+            bet75:   '#E11D48',  // 강렬한 레드 — Pot 75% Bet
+            overbet: '#A855F7',  // 퍼플 — Overbet/All-in
+        };
+
         function _pfCellBg(c1, c2, suited) {
-            const BET_S='#FB7185', BET_L='#E11D48', OB='#A855F7', CHK='#34D399', FOLD='#0D1117';
+            const { fold:FOLD, check:CHK, bet33:BET_S, bet75:BET_L, overbet:OB } = PF_COLOR;
             const d = _pfCellAnalysis(c1, c2, suited);
             if ((d.fold||0) >= 88) return FOLD;
             if (d.check >= 90) return CHK;
+
+            // All-in은 Overbet과 톤온톤(동일 퍼플) — 시각적 레이어만 살짝 진하게
+            const obTotal = d.overbet + (d.allin||0);
+
             const parts = []; let p = 0;
             if (d.bet33  > 0) { parts.push(`${BET_S} ${p}%`,`${BET_S} ${p+d.bet33}%`);  p += d.bet33;  }
             if (d.bet75  > 0) { parts.push(`${BET_L} ${p}%`,`${BET_L} ${p+d.bet75}%`);  p += d.bet75;  }
-            if (d.overbet> 0) { parts.push(`${OB}    ${p}%`,`${OB}    ${p+d.overbet}%`); p += d.overbet; }
+            if (obTotal  > 0) { parts.push(`${OB}    ${p}%`,`${OB}    ${p+obTotal}%`);  p += obTotal;  }
             if (d.check  > 0) { parts.push(`${CHK}   ${p}%`,`${CHK}   ${p+d.check}%`);  p += d.check;  }
-            if (p < 100)      { parts.push(`${FOLD}  ${p}%`,`${FOLD}  100%`); }
+            if (p < 99.5)     { parts.push(`${FOLD}  ${p}%`,`${FOLD}  100%`); }
             return parts.length ? `linear-gradient(to top,${parts.join(',')})` : FOLD;
         }
 
@@ -841,7 +1150,24 @@
             const ce=document.getElementById('pf-vcheck'), be=document.getElementById('pf-vbet');
             if(ce)ce.classList.toggle('pf-v-act', v==='check');
             if(be)be.classList.toggle('pf-v-act', v==='bet');
+            // villain='bet'일 때만 사이즈 픽커 노출 (조건부 렌더링)
+            const sizeWrap = document.getElementById('pf-vsize-wrap');
+            if (sizeWrap) {
+                sizeWrap.style.display = v==='bet' ? 'inline-flex' : 'none';
+                if (v==='bet') _updatePfVsizeChips();
+            }
             _updatePfSub(); renderPostflopMatrix();
+        }
+        function setPfVillainSize(sz) {
+            pfState.villainSize = sz;
+            _updatePfVsizeChips();
+            renderPostflopMatrix(); // 즉시 매트릭스 재계산
+        }
+        function _updatePfVsizeChips() {
+            ['33','75','ob','allin'].forEach(sz => {
+                const el = document.getElementById('pf-vs-'+sz);
+                if (el) el.classList.toggle('pf-vs-on', pfState.villainSize === sz);
+            });
         }
         function setPfPos(p) {
             if (p === 'oop' || p === 'ip') {
@@ -955,13 +1281,25 @@
                     // 마지막 카드까지 완성 → 잠깐 후 시트 자동 닫기
                     pfState._pickerCard = null;
                     _renderPfsBody();
-                    setTimeout(() => closePostflopSheet(), 280);
+                    setTimeout(() => closePostflopSheet(), 200);
                 }
             } else {
                 _renderPfsBody();
             }
         }
-        function _setPfsPot(val){pfState.pot=val;const inp=document.getElementById('pfs-pot-input');if(inp)inp.value=val;}
+        function _setPfsPot(val){
+            pfState.pot=val;
+            const inp=document.getElementById('pfs-pot-input'); if(inp)inp.value=val;
+            const pv=document.getElementById('pf-pot-val'); if(pv)pv.textContent=val;
+            renderPostflopMatrix(); // 프리셋 클릭 즉시 매트릭스 톤온톤 색상 갱신
+        }
+        function _onPfsPotInput(val){
+            const n = parseFloat(val);
+            if (isNaN(n) || n <= 0) return; // 입력 중(빈 값, 마이너스 등) 무시
+            pfState.pot = n;
+            const pv=document.getElementById('pf-pot-val'); if(pv)pv.textContent=n;
+            renderPostflopMatrix(); // 타이핑 즉시 13×13 매트릭스 재계산
+        }
         function _pfsSelectCard(idx){pfState._pickerCard=pfState._pickerCard===idx?null:idx;_renderPfsBody();}
         function _refreshBoardChip(){
             const btn=document.getElementById('pf-board'); if(!btn)return;
@@ -982,7 +1320,7 @@
                 const pr=[1.5,2,3,5,7,10,15,20];
                 body.innerHTML=`<span class="s-lbl">팟 사이즈 (BB)</span>
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                        <input type="number" id="pfs-pot-input" class="tr-input" value="${pfState.pot}" min="0.5" step="0.5" style="width:90px;" />
+                        <input type="number" id="pfs-pot-input" class="tr-input" value="${pfState.pot}" min="0.5" step="0.5" style="width:90px;" oninput="_onPfsPotInput(this.value)" />
                         <span style="color:#6B7280;font-size:13px;font-weight:600;">BB</span>
                     </div>
                     <div style="display:flex;flex-wrap:wrap;gap:6px;">
@@ -1026,26 +1364,71 @@
             if(badge){badge.textContent=GL[d.str]||'Medium';badge.style.color=GC[d.str]||'#9CA3AF';badge.style.borderColor=GC[d.str]||'#9CA3AF';badge.style.background=(GC[d.str]||'#9CA3AF')+'1a';}
             const sm={flop:'Flop',turn:'Turn',river:'River'};
             const ctx=document.getElementById('pfpContext');
-            if(ctx)ctx.textContent=`${sm[pfState.street]} · ${pfState.pos.toUpperCase()} · vs ${pfState.villain==='check'?'Check':'Bet'}`;
-            [{barId:'pfpCheckBar',pctId:'pfpCheckPct',pct:d.check},{barId:'pfpBet33Bar',pctId:'pfpBet33Pct',pct:d.bet33},
-             {barId:'pfpBet75Bar',pctId:'pfpBet75Pct',pct:d.bet75},{barId:'pfpOBBar',pctId:'pfpOBPct',pct:d.overbet}
-            ].forEach(({barId,pctId,pct})=>{ const b=document.getElementById(barId),pe=document.getElementById(pctId); if(b)b.style.width=pct+'%'; if(pe)pe.textContent=pct+'%'; });
+            const vSizeLbl = {'33':'33%','75':'75%','ob':'Overbet','allin':'All-in'}[pfState.villainSize]||'';
+            const vDesc = pfState.villain==='check' ? 'Check' : `Bet ${vSizeLbl}`;
+            if(ctx)ctx.textContent=`${sm[pfState.street]} · ${pfState.pos.toUpperCase()} · vs ${vDesc} · Pot ${pfState.pot}bb · SPR ${d.spr}`;
+            [{barId:'pfpFoldBar',pctId:'pfpFoldPct',pct:d.fold,col:'#64748B'},
+             {barId:'pfpCheckBar',pctId:'pfpCheckPct',pct:d.check},{barId:'pfpBet33Bar',pctId:'pfpBet33Pct',pct:d.bet33},
+             {barId:'pfpBet75Bar',pctId:'pfpBet75Pct',pct:d.bet75},{barId:'pfpOBBar',pctId:'pfpOBPct',pct:d.overbet},
+             {barId:'pfpAllinBar',pctId:'pfpAllinPct',pct:d.allin||0}
+            ].forEach(({barId,pctId,pct})=>{ const b=document.getElementById(barId),pe=document.getElementById(pctId); if(b)b.style.width=pct+'%'; if(pe)pe.textContent=pct.toFixed(1)+'%'; });
             const acts=[
+                {l:'Fold',                       p:d.fold,    slate:true},
                 {l:'Check',                      p:d.check},
                 {l:'Pot 33% Bet',                p:d.bet33},
                 {l:'Pot 75% Bet',                p:d.bet75},
-                {l:'Pot 150% Bet (Overbet)',      p:d.overbet}
+                {l:'Pot 150% Bet (Overbet)',      p:d.overbet},
+                {l:'All-in',                      p:d.allin||0}
             ];
             const top=acts.reduce((a,b)=>a.p>b.p?a:b);
             const re=document.getElementById('pfpRec');
-            if(re) re.innerHTML=`${top.l} <span style="font-size:11px;color:#6B7280;font-weight:600;">(빈도: ${top.p}%)</span>`;
+            if(re){
+                if (top.slate) {
+                    // Fold가 최상위 추천이면 빨간색이 아닌 차분한 슬레이트 그레이로 출력
+                    re.style.color = '#94A3B8';
+                    re.innerHTML=`Fold <span style="font-size:11px;color:#6B7280;font-weight:600;">(빈도: ${top.p.toFixed(1)}%)</span>`;
+                } else {
+                    re.style.color = '#FB7185';
+                    re.innerHTML=`${top.l} <span style="font-size:11px;color:#6B7280;font-weight:600;">(빈도: ${top.p.toFixed(1)}%)</span>`;
+                }
+            }
             const GS={monster:'★★★★★',strong:'★★★★☆',medium:'★★★☆☆',draw:'★★★★☆',air:'★★★☆☆'};
             const ge=document.getElementById('pfpGrade'); if(ge){ge.textContent=GS[d.str]||'★★★☆☆';ge.style.color=GC[d.str]||'#9CA3AF';}
             const notes={monster:'Monster 핸드. Bet 75%+ 주력으로 밸류를 극대화하세요.',strong:'Top pair. 33% 사이징은 콜링 레인지를 최대한 넓혀 EV를 극대화합니다.',draw:'세미-블러프. 폴드 에퀴티와 에퀴티 실현을 동시에 노립니다.',medium:'마지널 핸드. 체크로 팟을 컨트롤하고 자연스러운 쇼다운을 노리세요.',air:'에퀴티 없음. 체크-폴드가 기본입니다.'};
-            const ne=document.getElementById('pfpNote'); if(ne)ne.textContent=notes[d.str]||notes.medium;
+            let noteText = notes[d.str]||notes.medium;
+            // SPR/팟 컨텍스트 부가 설명
+            if (pfState.pot >= 15 && (d.allin||0) >= 8) {
+                noteText += ` 팟이 ${pfState.pot}bb로 커지며 SPR이 낮아져 올인/오버벳 비중이 급증했습니다.`;
+            }
+            // ── [지시사항 3] 베팅 사이즈(MDF) 반영 동적 Strategy Note ──
+            if (pfState.villain === 'bet') {
+                const vSizeLbl2 = {'33':'33%','75':'75%','ob':'오버벳','allin':'올인'}[pfState.villainSize]||'75%';
+                if (top.slate || d.fold >= 70) {
+                    // 폴드가 지배적인 경우 — 보드 텍스처와 압박을 반영한 폴드 사유 설명
+                    if (['ob','allin'].includes(pfState.villainSize)) {
+                        noteText += ` 보드 텍스처와 ${vSizeLbl2} 압박으로 인해 폴드합니다. 넛이 아닌 이상 팟오즈가 맞지 않습니다.`;
+                    } else {
+                        noteText += ` 상대의 ${vSizeLbl2} 베팅에 대해 약한 핸드는 폴드가 압도적입니다.`;
+                    }
+                } else if (pfState.villainSize === '33') {
+                    noteText += ` 상대의 33% 베팅에 맞춰 방어 레인지를 넓힙니다. 팟오즈가 우수해 콜/레이즈 빈도가 증가했습니다.`;
+                } else if (['monster','strong'].includes(d.str)) {
+                    noteText += ` 상대의 ${vSizeLbl2} 베팅에 콜/레이즈로 폴라라이징하여 응수합니다.`;
+                }
+            }
+            const ne=document.getElementById('pfpNote'); if(ne)ne.textContent=noteText;
             pfp.classList.add('pfp-open');
         }
-        function closePostflopPanel(){ const p=document.getElementById('postflopPanel'); if(p)p.classList.remove('pfp-open'); }
+        function closePostflopPanel(){
+            const p=document.getElementById('postflopPanel'); if(!p)return;
+            p.classList.remove('pfp-open');
+            // 다음 오픈 시 0%→목표% 애니메이션이 다시 보이도록 리셋
+            setTimeout(()=>{
+                ['pfpFoldBar','pfpCheckBar','pfpBet33Bar','pfpBet75Bar','pfpOBBar','pfpAllinBar'].forEach(id=>{
+                    const b=document.getElementById(id); if(b)b.style.width='0%';
+                });
+            }, 380); // 패널 닫힘 트랜지션(.38s) 종료 후
+        }
 
         // ── Matrix render (🚨 ISOLATED — no GTO engine calls) ────────────
         function renderPostflopMatrix(){
