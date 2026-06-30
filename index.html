@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>KJ Grid Reactive - PRO</title>
+    <title>홀덤광장 Reactive - PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         /* ══ ONLY WHAT TAILWIND CANNOT DO ══════════════════════════════ */
@@ -13,7 +15,7 @@
         /* Base */
         *,*::before,*::after{box-sizing:border-box;}
         html,body{margin:0;padding:0;background:#0A0C10;}
-        body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:#F9FAFB;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;overflow-x:hidden;}
+        body{font-family:'Inter','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;color:#F9FAFB;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;overflow-x:hidden;letter-spacing:-0.025em;}
         button{font-family:inherit;}
         #app{max-width:448px;margin:0 auto;min-height:100svh;display:flex;flex-direction:column;position:relative;}
 
@@ -157,10 +159,13 @@
         .tr-bc-r { font-size:14px;font-weight:900;font-family:'SF Mono',monospace;line-height:1; }
         .tr-bc-s { font-size:11px;margin-top:2px; }
         /* ── HUD 6-Max Table ──────────────────────────────────────────── */
-        .hud-seat { width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.28);font-family:inherit;font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.03em;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:all .22s ease; }
-        .hud-seat:active { transform:scale(.82);box-shadow:inset 0 2px 4px rgba(0,0,0,.6); }
-        .hud-on      { background:rgba(16,185,129,.18)!important;border-color:rgba(16,185,129,.55)!important;color:#10B981!important;box-shadow:0 0 14px rgba(16,185,129,.38),0 0 5px rgba(16,185,129,.22) inset!important; }
-        .hud-vill-on { background:rgba(251,113,133,.18)!important;border-color:rgba(251,113,133,.55)!important;color:#FB7185!important;box-shadow:0 0 14px rgba(251,113,133,.38),0 0 5px rgba(251,113,133,.22) inset!important; }
+        /* Schematic HUD: 박스 제거 → 궤도 위 떠 있는 텍스트 */
+        .hud-seat { padding:5px 8px;border-radius:8px;border:none;background:none;color:rgba(255,255,255,.2);font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:-0.02em;display:inline-flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:all .2s ease;min-width:36px; }
+        .hud-seat:active { opacity:.55; }
+        /* 히어로: 원색 네온 → 고급스러운 화이트 글로우 */
+        .hud-on      { color:#FFFFFF!important;background:rgba(255,255,255,.09)!important;border:none!important;box-shadow:0 0 14px rgba(255,255,255,.1),0 0 0 1px rgba(255,255,255,.04) inset!important;text-shadow:0 0 10px rgba(255,255,255,.5)!important; }
+        /* 빌런: 원색 레드 → 채도 낮은 파스텔 핑크 글로우 */
+        .hud-vill-on { color:#FFB8C6!important;background:rgba(255,175,190,.07)!important;border:none!important;box-shadow:0 0 12px rgba(255,160,175,.1)!important;text-shadow:0 0 8px rgba(255,150,165,.4)!important; }
 
         /* ── Tactile inset-press feel ──────────────────────────────────── */
         .mcell:active { transform:scale(.80);filter:brightness(.68);box-shadow:inset 0 2px 4px rgba(0,0,0,.5); }
@@ -190,6 +195,53 @@
         #pfs-backdrop { position:absolute;inset:0;background:rgba(0,0,0,.74); }
         #pfs-panel { position:absolute;bottom:0;left:0;right:0;max-width:448px;margin:0 auto;background:#13161A;border-top:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:0 16px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:78vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px); }
         #postflopSheet.pfs-open #pfs-panel { transform:translateY(0); }
+        /* ── Premium Training Dashboard — Flat Glass ──────────────────── */
+        /* 유리 대시보드 패널 */
+        .pf-dash {
+            padding:11px 14px 8px;
+            flex-shrink:0;
+            background:rgba(255,255,255,.018);
+            backdrop-filter:blur(20px) saturate(200%);
+            -webkit-backdrop-filter:blur(20px) saturate(200%);
+            border-bottom:1px solid rgba(255,255,255,.05);
+        }
+
+        /* iOS Segmented Control — 미니멀 */
+        #pf-seg { display:flex;position:relative;background:rgba(255,255,255,.05);border-radius:8px;padding:2px; }
+        #pf-seg-ind { position:absolute;top:2px;bottom:2px;border-radius:6px;background:rgba(255,255,255,.09);box-shadow:none;transition:left .22s cubic-bezier(.4,0,.2,1);pointer-events:none;will-change:left; }
+        .pf-seg-btn { flex:1;padding:6px 0;border:none;background:none;font-family:inherit;font-size:12px;font-weight:500;color:rgba(255,255,255,.3);cursor:pointer;position:relative;z-index:1;transition:color .15s;-webkit-tap-highlight-color:transparent;letter-spacing:-0.025em; }
+        .pf-seg-btn.seg-on { color:rgba(255,255,255,.9);font-weight:700; }
+
+        /* Dynamic Island Board */
+        .pf-island { display:inline-flex;align-items:center;justify-content:center;gap:5px;background:#040608;border-radius:100px;padding:7px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:filter .12s;font-family:'SF Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.02em;flex-shrink:0;border:none; }
+        .pf-island:active { filter:brightness(1.8); }
+
+        /* 팟 위젯 — 미니멀 텍스트 */
+        .pf-pot-w { display:inline-flex;align-items:center;gap:2px;padding:5px 8px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;color:rgba(255,255,255,.35);background:none;-webkit-tap-highlight-color:transparent;transition:color .12s; }
+        .pf-pot-w:active { color:rgba(255,255,255,.7); }
+
+        /* 빌런 액션 위젯 — 완전 플랫 */
+        .pf-vbtn { display:inline-flex;align-items:center;gap:3px;padding:5px 9px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:500;font-family:inherit;color:rgba(255,255,255,.28);background:none;-webkit-tap-highlight-color:transparent;transition:all .15s;white-space:nowrap;letter-spacing:-0.025em; }
+        .pf-vbtn:active { opacity:.6; }
+        .pf-v-act { color:rgba(255,255,255,.82)!important;background:rgba(255,255,255,.06)!important;font-weight:700!important; }
+        /* ── 타이포그래피 계층: 데이터 강조 / 라벨 뮤트 ─────────────── */
+        /* 퍼센트 수치 — font-black, 고정폭 */
+        #pRPct,#pCPct,#pFPct,#pEV,
+        #pfpCheckPct,#pfpBet33Pct,#pfpBet75Pct,#pfpOBPct {
+            font-weight:900;
+            letter-spacing:-0.04em;
+            font-variant-numeric:tabular-nums;
+            font-feature-settings:'tnum';
+        }
+        /* 패널 GTO 라벨 — font-medium, 채도 죽임 */
+        #postflopPanel .text-\[9px\], #floatingPanel .text-\[9px\] { font-weight:500;letter-spacing:.06em; }
+        /* 전략 텍스트 전반 — Inter 자간 적용 */
+        #pStrategy, #pfpNote { letter-spacing:-0.018em;line-height:1.6; }
+        /* 행렬 셀 텍스트 — 작고 정밀하게 */
+        .mcell-rank { letter-spacing:-0.04em; }
+        .txt-s, .txt-o { letter-spacing:-0.02em; }
+        /* 탭 바 */
+        #tab_solver, #tab_training { letter-spacing:-0.025em; }
     </style>
 </head>
 <body>
@@ -415,7 +467,7 @@
             </div>
             <!-- Pot 150% Bet (Overbet) -->
             <div style="display:flex;align-items:center;gap:8px;">
-                <span style="width:148px;font-size:10px;color:#9CA3AF;font-weight:600;flex-shrink:0;letter-spacing:.02em;">Pot 150% Bet (OB)</span>
+                <span style="width:148px;font-size:10px;color:#9CA3AF;font-weight:600;flex-shrink:0;letter-spacing:.02em;">Pot 150% Bet (Overbet)</span>
                 <div style="flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">
                     <div id="pfpOBBar" style="height:100%;width:0%;background:#A855F7;border-radius:99px;transition:width .45s ease;"></div>
                 </div>
@@ -502,7 +554,7 @@
             <!-- ── Compact HUD Poker Table ─────────────────────── -->
             <div style="position:relative;height:120px;margin-bottom:8px;">
                 <!-- Oval felt surface -->
-                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:56%;height:68px;border-radius:999px;background:linear-gradient(160deg,rgba(16,185,129,.05),rgba(16,185,129,.02));border:1px solid rgba(16,185,129,.14);box-shadow:inset 0 0 28px rgba(0,0,0,.4);pointer-events:none;"></div>
+                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:60%;height:70px;border-radius:999px;background:none;border:1px solid rgba(255,255,255,.08);pointer-events:none;"></div>
                 <!-- Center label -->
                 <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;">
                     <span style="font-size:7px;color:rgba(255,255,255,.1);font-weight:800;letter-spacing:.16em;text-transform:uppercase;">6-MAX</span>
@@ -575,37 +627,38 @@
     <!-- ╚══════════════════════════════════════════╝ -->
     <div id="trainingTab" style="display:none;flex-direction:column;flex:1;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px);">
 
-        <!-- ─── 1층: Postflop 조건 칩 바 ──────────────────────────────── -->
-        <div style="padding:8px 12px 0;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06);">
-            <div style="display:flex;gap:6px;flex-wrap:wrap;padding:4px 0 6px;row-gap:6px;">
-                <!-- Street -->
-                <button class="pf-chip pf-on" id="pf-flop"  onclick="setPfStreet('flop')">Flop</button>
-                <button class="pf-chip"        id="pf-turn"  onclick="setPfStreet('turn')">Turn</button>
-                <button class="pf-chip"        id="pf-river" onclick="setPfStreet('river')">River</button>
-                <div style="width:1px;background:rgba(255,255,255,.07);flex-shrink:0;margin:4px 2px;"></div>
-                <!-- Board (tappable → picker sheet) -->
-                <button class="pf-chip" id="pf-board" onclick="showPostflopSheet('board')" style="font-family:'SF Mono',monospace;font-size:12px;letter-spacing:.04em;">A<span style="color:#F87171;">♠</span> Q<span style="color:#F87171;">♦</span> 7♣</button>
-                <!-- Pot (tappable → picker sheet) -->
-                <button class="pf-chip" id="pf-pot" onclick="showPostflopSheet('pot')">팟 5BB</button>
-                <div style="width:1px;background:rgba(255,255,255,.07);flex-shrink:0;margin:4px 2px;"></div>
-                <!-- Villain action -->
-                <button class="pf-chip pf-on" id="pf-vcheck" onclick="setPfVillain('check')">상대: 체크</button>
-                <button class="pf-chip"        id="pf-vbet"   onclick="setPfVillain('bet')">상대: 베팅</button>
-                <div style="width:1px;background:rgba(255,255,255,.07);flex-shrink:0;margin:4px 2px;"></div>
-                <!-- Position (synced with HUD below) -->
-                <button class="pf-chip pf-on" id="pf-oop" onclick="setPfPos('oop')">OOP (먼저 액션)</button>
-                <button class="pf-chip"        id="pf-ip"  onclick="setPfPos('ip')">IP (나중 액션)</button>
-                <!-- 우측 끝 잘림 방지 스페이서 -->
-                <div style="min-width:12px;flex-shrink:0;"></div>
+        <!-- ─── 1층: 프리미엄 대시보드 ──────────────────────────────── -->
+        <div class="pf-dash">
+            <!-- iOS Segmented Control: Flop / Turn / River -->
+            <div id="pf-seg">
+                <div id="pf-seg-ind"></div>
+                <button class="pf-seg-btn seg-on" id="pf-flop"  onclick="setPfStreet('flop')">Flop</button>
+                <button class="pf-seg-btn"         id="pf-turn"  onclick="setPfStreet('turn')">Turn</button>
+                <button class="pf-seg-btn"         id="pf-river" onclick="setPfStreet('river')">River</button>
             </div>
-            <div id="pfSub" style="font-size:10px;color:#4B5563;padding:2px 0 4px;min-height:16px;"></div>
+            <!-- Row 2: Dynamic Island 보드 + 팟 + 상대 액션 -->
+            <div style="display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap;row-gap:6px;">
+                <!-- Dynamic Island: 보드 카드 (누르면 픽커 오픈) -->
+                <button id="pf-board" onclick="showPostflopSheet('board')" class="pf-island">
+                    A<span style="color:#F87171;">♠</span> Q<span style="color:#F87171;">♦</span> 7♣
+                </button>
+                <!-- 팟 사이즈 위젯 -->
+                <button onclick="showPostflopSheet('pot')" class="pf-pot-w">
+                    💰 <span id="pf-pot-val">5</span><span style="font-size:10px;color:#6B7280;font-weight:600;">bb</span>
+                </button>
+                <!-- 상대 액션 미니멀 토글 -->
+                <button class="pf-vbtn pf-v-act" id="pf-vcheck" onclick="setPfVillain('check')">👿 체크</button>
+                <button class="pf-vbtn"           id="pf-vbet"   onclick="setPfVillain('bet')">👿 베팅</button>
+            </div>
+            <!-- Sub: HUD 포지션 정보 -->
+            <div id="pfSub" style="font-size:10px;color:#374151;margin-top:5px;min-height:14px;"></div>
         </div>
 
         <!-- ─── 2층: HUD 6-Max Table (pfState.pos 연동) ──────────────── -->
         <div style="padding:8px 14px 4px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.05);">
             <div style="position:relative;height:116px;">
                 <!-- Oval surface -->
-                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:56%;height:66px;border-radius:999px;background:linear-gradient(160deg,rgba(251,113,133,.05),rgba(251,113,133,.02));border:1px solid rgba(251,113,133,.14);box-shadow:inset 0 0 28px rgba(0,0,0,.4);pointer-events:none;"></div>
+                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:60%;height:70px;border-radius:999px;background:none;border:1px solid rgba(255,255,255,.08);pointer-events:none;"></div>
                 <!-- Center: Hero / Villain toggle -->
                 <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10;">
                     <div style="display:flex;gap:2px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px;">
@@ -780,14 +833,14 @@
 
         function setPfStreet(s) {
             pfState.street = s;
-            ['flop','turn','river'].forEach(k => { const el=document.getElementById('pf-'+k); if(el)el.classList.toggle('pf-on',k===s); });
+            _animSeg();
             _refreshBoardChip(); _updatePfSub(); renderPostflopMatrix();
         }
         function setPfVillain(v) {
             pfState.villain = v;
             const ce=document.getElementById('pf-vcheck'), be=document.getElementById('pf-vbet');
-            if(ce)ce.classList.toggle('pf-on',v==='check');
-            if(be){be.classList.toggle('pf-on',v==='bet');be.classList.toggle('pf-bet',v==='bet');}
+            if(ce)ce.classList.toggle('pf-v-act', v==='check');
+            if(be)be.classList.toggle('pf-v-act', v==='bet');
             _updatePfSub(); renderPostflopMatrix();
         }
         function setPfPos(p) {
@@ -825,15 +878,25 @@
                 if(k===pfState.villainPos) el.classList.add('hud-vill-on');   // 빨간 네온
             });
         }
+        // ── 세그먼트 컨트롤 애니메이션 ──────────────────────────────────
+        function _animSeg() {
+            const idx=['flop','turn','river'].indexOf(pfState.street);
+            const ind=document.getElementById('pf-seg-ind');
+            const btns=document.querySelectorAll('.pf-seg-btn');
+            btns.forEach((b,i)=>b.classList.toggle('seg-on',i===idx));
+            if(!ind)return;
+            const seg=document.getElementById('pf-seg');
+            if(!seg)return;
+            const W=seg.offsetWidth-4; // minus 2px padding each side
+            const btnW=W/3;
+            ind.style.width=btnW+'px';
+            ind.style.left=(2+idx*btnW)+'px';
+        }
         function _updatePfSub() {
             const sub=document.getElementById('pfSub'); if(!sub)return;
-            const sm={flop:'플랍',turn:'턴',river:'리버'}, vm={check:'빌런 체크',bet:'빌런 베팅'};
-            const SY={s:'♠',h:'♥',d:'♦',c:'♣'};
-            const cnt={flop:3,turn:4,river:5}[pfState.street]||3;
-            const bd=pfState.board.slice(0,cnt).map(c=>c&&c.r?c.r+(SY[c.s]||'?'):'?').join(' ');
-            const hp=(pfState.heroPos||'??').toUpperCase();
-            const vp=(pfState.villainPos||'??').toUpperCase();
-            sub.textContent=`↳ ${sm[pfState.street]} [${bd}] · ${vm[pfState.villain]} · 👤${hp} vs 👿${vp}`;
+            const hp=(pfState.heroPos||'?').toUpperCase();
+            const vp=(pfState.villainPos||'?').toUpperCase();
+            sub.textContent=hp===vp?'':(`👤 ${hp}  vs  👿 ${vp}`);
         }
 
         // ── Board / Pot picker sheet ──────────────────────────────────────
@@ -862,7 +925,8 @@
             if(pfState._pickerType==='pot'){
                 const inp=document.getElementById('pfs-pot-input');
                 if(inp)pfState.pot=parseFloat(inp.value)||pfState.pot;
-                const btn=document.getElementById('pf-pot'); if(btn)btn.textContent=`팟 ${pfState.pot}BB`;
+                const pv=document.getElementById('pf-pot-val');
+                if(pv)pv.textContent=pfState.pot;
             } else { _refreshBoardChip(); }
             closePostflopSheet(); renderPostflopMatrix();
         }
@@ -967,10 +1031,10 @@
              {barId:'pfpBet75Bar',pctId:'pfpBet75Pct',pct:d.bet75},{barId:'pfpOBBar',pctId:'pfpOBPct',pct:d.overbet}
             ].forEach(({barId,pctId,pct})=>{ const b=document.getElementById(barId),pe=document.getElementById(pctId); if(b)b.style.width=pct+'%'; if(pe)pe.textContent=pct+'%'; });
             const acts=[
-                {l:'Check',              p:d.check},
-                {l:'Pot 33% Bet',        p:d.bet33},
-                {l:'Pot 75% Bet',        p:d.bet75},
-                {l:'Pot 150% Bet (OB)',  p:d.overbet}
+                {l:'Check',                      p:d.check},
+                {l:'Pot 33% Bet',                p:d.bet33},
+                {l:'Pot 75% Bet',                p:d.bet75},
+                {l:'Pot 150% Bet (Overbet)',      p:d.overbet}
             ];
             const top=acts.reduce((a,b)=>a.p>b.p?a:b);
             const re=document.getElementById('pfpRec');
@@ -1013,7 +1077,8 @@
                 cell.style.background=_pfCellBg(cell.dataset.c1,cell.dataset.c2,(cell.dataset.c1!==cell.dataset.c2)&&cell.dataset.s==='s');
             });
             ['ep','mp','co','btn','sb','bb'].forEach(k=>{ const el=document.getElementById('pf-hud-'+k.toUpperCase()); if(el)el.classList.toggle('hud-on',k===pfState.pos); });
-            updatePfHud(); // hero(초록) + villain(빨강) 듀얼 컬러 동기화
+            updatePfHud();
+            _animSeg();   // 세그먼트 컨트롤 위치 동기화
             _updatePfSub();
         }
 
